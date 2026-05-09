@@ -136,7 +136,11 @@ def run(
             for prob_name, prob_dir, prob_config in all_problems:
                 typer.echo(f"  [{model_name}+{agent_name}] {prob_name} ... ", nl=False)
 
-                work_dir = prepare_work_dir(prob_dir, tmpdir_path / f"{model_name}__{agent_name}")
+                work_dir = prepare_work_dir(
+                    prob_dir,
+                    tmpdir_path / f"{model_name}__{agent_name}",
+                    prob_config,
+                )
                 exec_result = run_task(
                     problem_config=prob_config,
                     model_cfg=model_cfg,

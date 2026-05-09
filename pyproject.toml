@@ -25,3 +25,6 @@ packages = ["runner"]
 
 [tool.uv]
 package = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
