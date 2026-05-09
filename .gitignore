@@ -1,0 +1,26 @@
+# Config with API keys
+config.yaml
+
+# Results
+results/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# uv
+uv.lock
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Ruff cache
+.ruff_cache/
+
+# Pytest cache
+.pytest_cache/

@@ -1,0 +1,19 @@
+name: "template-problem"
+difficulty: easy              # easy / medium / hard
+category: algorithm           # algorithm / web / system / tool-use / ...
+tags: [template]
+
+prompt: |
+  在这里写任务描述，发给模型/Agent。
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.5
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.2
+
+target_file: "solution.py"
+timeout: 30
