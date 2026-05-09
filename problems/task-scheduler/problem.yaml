@@ -1,0 +1,24 @@
+name: "task-scheduler"
+difficulty: hard
+category: system
+tags: [scheduler, concurrency, dependencies, topological-sort]
+
+prompt: |
+  Implement TaskScheduler in solution.py. It must support
+  TaskScheduler(max_workers: int = 4), add_task(name: str, fn: Callable,
+  dependencies: list[str] = []), and run_all() -> dict[str, Any].
+  Tasks must run after their dependencies. Independent tasks should run
+  concurrently up to max_workers. Cycles must raise ValueError("Cycle detected").
+  If a task raises, collect an error value for that task rather than crashing.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

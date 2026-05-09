@@ -1,0 +1,23 @@
+name: "text-editor"
+difficulty: hard
+category: algorithm
+tags: [text, undo, redo, state-management]
+
+prompt: |
+  Implement TextEditor in solution.py with methods insert(line, col, text),
+  delete(line, col, length), replace(line, col, length, new_text), get_text(),
+  undo(), and redo(). Use zero-based line and column indexes. Invalid positions
+  must raise IndexError. Undo at the initial state and redo with no history are
+  no-ops. Any new edit after undo must clear redo history.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30
