@@ -40,7 +40,7 @@ def _run_ruff_check(file_path: Path) -> int:
             timeout=10,
         )
         if result.stdout.strip():
-            return len([l for l in result.stdout.strip().split("\n") if l.strip()])
+            return len([line for line in result.stdout.strip().split("\n") if line.strip()])
         return 0
     except Exception:
         return 0

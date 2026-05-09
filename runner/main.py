@@ -1,7 +1,6 @@
 """OrangeBenchmark CLI entry point."""
 
 import json
-import shutil
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -50,7 +49,6 @@ def _resolve_combos(config: dict, models_filter: Optional[str], agents_filter: O
     """Resolve which model×agent combos to run."""
     models = config.get("models", [])
     agents = config.get("agents", [])
-    providers = config.get("providers", [])
 
     if models_filter:
         names = [n.strip() for n in models_filter.split(",")]
