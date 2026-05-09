@@ -1,0 +1,22 @@
+name: "rest-api"
+difficulty: medium
+category: api
+tags: [http, json, crud, standard-library]
+
+prompt: |
+  Use Python's standard library http.server to implement a small REST API.
+  Implement create_app() in solution.py. It should return an HTTPServer instance
+  serving an in-memory tasks collection. Support GET /tasks with optional
+  ?status=done filtering, POST /tasks, PUT /tasks/{id}, and DELETE /tasks/{id}.
+  Tasks contain id, title, status, and created_at. Malformed JSON returns 400.
+  Missing IDs return 404.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "solution.py"
+timeout: 30

@@ -1,0 +1,23 @@
+name: "lru-cache"
+difficulty: medium
+category: algorithm
+tags: [cache, linked-list, hash-map, performance]
+
+prompt: |
+  Implement an LRUCache class in solution.py.
+  It must support __init__(capacity: int), get(key: int) -> int,
+  and put(key: int, value: int) -> None. Missing keys return -1.
+  When capacity is full, evict the least recently used key. Both get and put
+  should be O(1). Capacity 0 means put has no effect.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

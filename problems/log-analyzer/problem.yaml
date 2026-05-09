@@ -1,0 +1,23 @@
+name: "log-analyzer"
+difficulty: medium
+category: data
+tags: [logs, parsing, streaming, performance]
+
+prompt: |
+  Implement analyze_log(filepath: str) -> dict in solution.py.
+  Parse nginx combined-style access logs and return total_requests, methods,
+  status_codes, top_paths, and avg_response_time. Malformed lines should be
+  skipped. The optional last field is response time in seconds. Process files
+  line by line rather than loading large logs into memory.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30
