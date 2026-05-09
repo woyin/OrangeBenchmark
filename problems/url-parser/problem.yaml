@@ -1,0 +1,21 @@
+name: "url-parser"
+difficulty: easy
+category: string
+tags: [url, parsing, strings, edge-cases]
+
+prompt: |
+  Implement parse_url(url: str) -> dict without using urllib or urllib3.
+  Return keys: scheme, host, port, path, query_params, fragment.
+  Use default ports 80 for http and 443 for https. Percent-decode query
+  keys and values. Path-only URLs should have no scheme or host.
+  Write the code in solution.py.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "solution.py"
+timeout: 30

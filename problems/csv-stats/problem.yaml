@@ -1,0 +1,22 @@
+name: "csv-stats"
+difficulty: easy
+category: data
+tags: [csv, statistics, file-io, dirty-data]
+
+prompt: |
+  Implement analyze_csv(filepath: str) -> dict.
+  Read a CSV file and return per-column statistics. Numeric columns must return
+  {"mean": float | None, "max": float | None, "min": float | None,
+  "null_count": int}. Non-numeric columns must return
+  {"type": "non-numeric", "null_count": int}. Missing cells in ragged rows
+  count as nulls. Empty files return {}. Write the code in solution.py.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "solution.py"
+timeout: 30

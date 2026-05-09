@@ -1,0 +1,20 @@
+name: "two-sum"
+difficulty: easy
+category: algorithm
+tags: [array, hash-map, edge-cases]
+
+prompt: |
+  Implement two_sum(nums: list[int], target: int) -> list[int].
+  Return the indices of two distinct elements whose values add up to target.
+  If no valid pair exists, return an empty list.
+  The same element may not be used twice. Write the code in solution.py.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "solution.py"
+timeout: 30
