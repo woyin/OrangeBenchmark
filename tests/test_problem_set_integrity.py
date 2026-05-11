@@ -15,6 +15,8 @@ EXPECTED_PROBLEMS = {
     "text-editor",
     "task-scheduler",
     "wasm-calculator",
+    "java-reverse-string",
+    "dotnet-fizz-buzz",
 }
 
 

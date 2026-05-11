@@ -1,0 +1,22 @@
+name: "dotnet-fizz-buzz"
+difficulty: easy
+category: algorithm
+tags: [dotnet, csharp, algorithm, edge-cases]
+
+prompt: |
+  Implement a FizzBuzz class in FizzBuzz.cs.
+  Provide a static method `Generate(int n) -> List<string>` that returns a list
+  of strings from 1 to n. For multiples of 3 use "Fizz", multiples of 5 use
+  "Buzz", multiples of both use "FizzBuzz". Otherwise use the number itself.
+  Return an empty list for n <= 0.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "FizzBuzz.cs"
+copy_paths: ["dotnet-fizz-buzz.csproj"]
+timeout: 30

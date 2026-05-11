@@ -241,3 +241,21 @@ uv run orangebench show --model gpt-4o --agent codex --problem sorting-algo
 ## .gitignore
 
 `config.yaml` 和 `results/` 应加入 `.gitignore`，避免泄露 API Key 和产生不必要的 diff。
+
+---
+
+## 多语言支持扩展
+
+除 Python 和 Rust/Wasm 外，Runner 已原生支持以下语言的自动检测与默认评分：
+
+### Java（Maven）
+- **检测依据**：工作目录下存在 `pom.xml`
+- **correctness**：`mvn test -q`（测试通过即 1.0，否则 0.0）
+- **code_quality**：`mvn compile -q`（编译通过即 1.0，否则 0.5）
+
+### .NET / C#
+- **检测依据**：工作目录下存在 `.csproj` 文件
+- **correctness**：`dotnet build` 通过后执行 `dotnet test --no-build`（通过即 1.0）
+- **code_quality**：`dotnet build --verbosity normal`，根据编译警告数量扣分（0 警告 = 1.0，每 1 个警告扣 0.1）
+
+> 若题目目录中包含自定义 `scoring.py`，则优先使用自定义评分函数；否则触发上述自动检测逻辑。

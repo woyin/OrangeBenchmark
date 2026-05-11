@@ -1,5 +1,6 @@
 """Terminal output using rich tables."""
 
+import json
 from rich.console import Console
 from rich.table import Table
 
@@ -15,7 +16,6 @@ def display_results(results: dict) -> None:
     table.add_column("Agent", min_width=14)
     table.add_column("Overall", justify="right", min_width=8)
 
-    # Collect all dimension names from results
     dim_names = []
     for combo in results.get("combos", []):
         for prob in combo.get("problems", []):
@@ -26,7 +26,6 @@ def display_results(results: dict) -> None:
     for dim in dim_names:
         table.add_column(dim[0].upper(), justify="right", min_width=5)
 
-    # Sort combos by overall score descending
     sorted_combos = sorted(
         results.get("combos", []),
         key=lambda c: c.get("overall", 0),
@@ -50,7 +49,7 @@ def display_results(results: dict) -> None:
     console.print()
 
 
-def display_detail(result_entry: dict) -> None:
+def display_detail(result_entry: dict, show_trace: bool = False) -> None:
     """Display detailed breakdown for one combo+problem."""
     console = Console()
 
@@ -86,6 +85,20 @@ def display_detail(result_entry: dict) -> None:
     )
     console.print(table)
     console.print()
+
+    if show_trace:
+        for prob in result_entry.get("problems", []):
+            trace = prob.get("trace")
+            if trace:
+                console.print(f"[bold cyan]Trace: {prob['name']}[/bold cyan]")
+                console.print(f"  Summary: {json.dumps(trace.get('summary', {}), indent=4)}")
+                console.print(f"  Events ({len(trace.get('events', []))}):")
+                for event in trace.get("events", []):
+                    event_type = event.get("type", "?")
+                    ts = event.get("timestamp", "")
+                    extra = {k: v for k, v in event.items() if k not in ("type", "timestamp")}
+                    console.print(f"    [{event_type}] {ts}  {extra}")
+                console.print()
 
 
 def _avg_scores(combo: dict) -> dict[str, float]:

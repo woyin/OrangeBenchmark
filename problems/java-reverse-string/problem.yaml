@@ -1,0 +1,20 @@
+name: "java-reverse-string"
+difficulty: easy
+category: string
+tags: [java, strings, edge-cases]
+
+prompt: |
+  Implement a StringReverser class in src/main/java/StringReverser.java.
+  Provide a static method `reverse(String s) -> String` that reverses the
+  input string character by character. Return an empty string for null input.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "src/main/java/StringReverser.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

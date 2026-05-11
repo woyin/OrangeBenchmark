@@ -350,3 +350,79 @@ class TaskScheduler:
 | H1 | text-editor | hard | algorithm | Python | correctness, code_quality, performance |
 | H2 | task-scheduler | hard | system | Python | correctness, code_quality, performance |
 | H3 | wasm-calculator | hard | multi-lang | Rust/Wasm | correctness, code_quality, performance |
+
+---
+
+## 新增题目
+
+### E4. java-reverse-string（string, Java）
+
+**目录**：`problems/java-reverse-string/`
+
+**题目描述**：
+在 `src/main/java/StringReverser.java` 中实现 `StringReverser` 类，提供静态方法 `reverse(String s) -> String`。要求逐字符反转输入字符串，输入为 `null` 时返回空字符串。
+
+**target_file**：`src/main/java/StringReverser.java`
+
+**测试用例**：
+- 基本字符串：`"hello"` → `"olleh"`
+- 空字符串：`""` → `""`
+- `null` 输入 → `""`
+- 单字符：`"a"` → `"a"`
+- Unicode：`"你好世界"` → `"界世好你"`
+- 回文：`"abcba"` → `"abcba"`
+
+**评分维度**：
+- correctness（weight: 0.6）— `mvn test` 通过率
+- code_quality（weight: 0.4）— `mvn compile` 编译通过
+
+**注意事项**：
+- 使用 Maven 构建，需提供 `pom.xml`
+- Java 版本要求 17
+- Runner 需支持 Maven 项目自动检测（通过 `pom.xml`）
+
+---
+
+### E5. dotnet-fizz-buzz（algorithm, .NET / C#）
+
+**目录**：`problems/dotnet-fizz-buzz/`
+
+**题目描述**：
+在 `FizzBuzz.cs` 中实现 `FizzBuzz` 类，提供静态方法 `Generate(int n) -> List<string>`。返回 1 到 n 的字符串列表：3 的倍数替换为 "Fizz"，5 的倍数替换为 "Buzz"，同时是 3 和 5 的倍数替换为 "FizzBuzz"，其余使用数字本身。`n <= 0` 时返回空列表。
+
+**target_file**：`FizzBuzz.cs`
+
+**测试用例**：
+- `Generate(15)` 返回完整 FizzBuzz 序列
+- `Generate(0)` → 空列表
+- `Generate(-5)` → 空列表
+- `Generate(3)` 仅到 "Fizz"
+- `Generate(5)` 仅到 "Buzz"
+- `Generate(15)[14]` 为 "FizzBuzz"
+
+**评分维度**：
+- correctness（weight: 0.6）— `dotnet test` 通过率
+- code_quality（weight: 0.4）— `dotnet build` 编译通过及警告数量
+
+**注意事项**：
+- 使用 .NET 8 SDK，需提供 `.csproj` 文件
+- 测试框架使用 xUnit
+- Runner 需支持 .NET 项目自动检测（通过 `.csproj`）
+
+---
+
+## 更新后题目汇总
+
+| # | 名称 | 难度 | 维度 | 语言 | 评分维度 |
+|---|------|------|------|------|---------|
+| E1 | two-sum | easy | algorithm | Python | correctness, code_quality |
+| E2 | csv-stats | easy | data | Python | correctness, code_quality |
+| E3 | url-parser | easy | string | Python | correctness, code_quality |
+| E4 | java-reverse-string | easy | string | Java | correctness, code_quality |
+| E5 | dotnet-fizz-buzz | easy | algorithm | .NET/C# | correctness, code_quality |
+| M1 | lru-cache | medium | algorithm | Python | correctness, code_quality, performance |
+| M2 | rest-api | medium | api | Python | correctness, code_quality |
+| M3 | log-analyzer | medium | data | Python | correctness, code_quality, performance |
+| H1 | text-editor | hard | algorithm | Python | correctness, code_quality, performance |
+| H2 | task-scheduler | hard | system | Python | correctness, code_quality, performance |
+| H3 | wasm-calculator | hard | multi-lang | Rust/Wasm | correctness, code_quality, performance |
