@@ -5,8 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-from runner.scoring.behavior import score_cost_efficiency, score_tool_efficiency
-
 
 def _run_pytest(work_dir: Path) -> tuple[int, int]:
     """Run pytest in work_dir, return (passed, total)."""
@@ -47,10 +45,6 @@ def _run_ruff_check(file_path: Path) -> int:
         return 0
 
 
-# ---------------------------------------------------------------------------
-# Java / Maven helpers
-# ---------------------------------------------------------------------------
-
 def _detect_java_maven(work_dir: Path) -> bool:
     return (work_dir / "pom.xml").exists()
 
@@ -82,10 +76,6 @@ def _run_maven_compile(work_dir: Path) -> float:
     except Exception:
         return 0.0
 
-
-# ---------------------------------------------------------------------------
-# .NET helpers
-# ---------------------------------------------------------------------------
 
 def _detect_dotnet(work_dir: Path) -> bool:
     return any(f.suffix == ".csproj" for f in work_dir.iterdir())
@@ -133,10 +123,6 @@ def _run_dotnet_build_quality(work_dir: Path) -> float:
         return 0.0
 
 
-# ---------------------------------------------------------------------------
-# Custom scorer loading
-# ---------------------------------------------------------------------------
-
 def _load_custom_scorer(problem_dir: Path):
     """Load custom scoring.py from problem directory if it exists."""
     scoring_path = problem_dir / "scoring.py"
@@ -155,7 +141,6 @@ def score_problem(
     work_dir: Path,
     generated_code: str,
     problem_config: dict,
-    trace_data: dict | None = None,
 ) -> dict:
     """Score a problem result. Returns dict with dimension scores and total."""
     scoring_config = problem_config.get("scoring", {})
@@ -179,11 +164,11 @@ def score_problem(
             try:
                 scores[name] = float(func(generated_code, str(work_dir)))
             except NotImplementedError:
-                scores[name] = _default_score(name, target_path, work_dir, trace_data, problem_config)
+                scores[name] = _default_score(name, target_path, work_dir)
             except Exception:
                 scores[name] = 0.0
         else:
-            scores[name] = _default_score(name, target_path, work_dir, trace_data, problem_config)
+            scores[name] = _default_score(name, target_path, work_dir)
 
     total = sum(scores[dim["name"]] * dim["weight"] for dim in dimensions)
     total = min(max(total, 0.0), 1.0)
@@ -191,13 +176,7 @@ def score_problem(
     return {"scores": scores, "total": round(total, 4)}
 
 
-def _default_score(
-    name: str,
-    target_path: Path,
-    work_dir: Path,
-    trace_data: dict | None = None,
-    problem_config: dict | None = None,
-) -> float:
+def _default_score(name: str, target_path: Path, work_dir: Path) -> float:
     """Get default score for a dimension."""
     if name == "correctness":
         return _default_correctness(work_dir)
@@ -205,10 +184,6 @@ def _default_score(
         return _default_code_quality(target_path, work_dir)
     elif name == "performance":
         return 0.7
-    elif name == "cost_efficiency":
-        return score_cost_efficiency("", str(work_dir), trace_data, problem_config)
-    elif name == "tool_efficiency":
-        return score_tool_efficiency("", str(work_dir), trace_data, problem_config)
     else:
         return 0.5
 

@@ -1,38 +1,28 @@
 """OrangeBenchmark CLI entry point."""
 
 import json
+import shutil
 import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 import typer
-import yaml
 
-from runner.agent_wrapper import get_agent_wrapper
-from runner.executor import prepare_work_dir, run_task
+from runner.executor import prepare_work_dir
 from runner.reporter import display_detail, display_results
 from runner.scorer import score_problem
 
 app = typer.Typer(name="orangebench", help="OrangeBenchmark — LLM & Coding Agent evaluation framework")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-CONFIG_PATH = PROJECT_ROOT / "config.yaml"
 PROBLEMS_DIR = PROJECT_ROOT / "problems"
 RESULTS_DIR = PROJECT_ROOT / "results"
-TRACES_DIR = PROJECT_ROOT / "traces"
-
-
-def _load_config() -> dict:
-    """Load config. Returns empty dict if config.yaml doesn't exist (for score-only mode)."""
-    if not CONFIG_PATH.exists():
-        return {}
-    with open(CONFIG_PATH) as f:
-        return yaml.safe_load(f) or {}
 
 
 def _discover_problems() -> list[tuple[str, Path, dict]]:
     """Discover all problems. Returns list of (name, dir_path, config)."""
+    import yaml
     problems = []
     if not PROBLEMS_DIR.exists():
         return problems
@@ -47,206 +37,17 @@ def _discover_problems() -> list[tuple[str, Path, dict]]:
     return problems
 
 
-def _resolve_combos(config: dict, models_filter: Optional[str], agents_filter: Optional[str], all_combos: bool) -> list[dict]:
-    """Resolve which model×agent combos to run."""
-    models = config.get("models", [])
-    agents = config.get("agents", [])
-
-    if models_filter:
-        names = [n.strip() for n in models_filter.split(",")]
-        models = [m for m in models if m["name"] in names]
-    if agents_filter:
-        names = [n.strip() for n in agents_filter.split(",")]
-        agents = [a for a in agents if a["name"] in names]
-
-    if all_combos:
-        combos = []
-        for m in models:
-            for a in agents:
-                combos.append({"model": m["name"], "agent": a["name"]})
-        return combos
-
-    combos = config.get("combos", [])
-    if models_filter or agents_filter:
-        if models_filter:
-            m_names = {n.strip() for n in models_filter.split(",")}
-            combos = [c for c in combos if c["model"] in m_names]
-        if agents_filter:
-            a_names = {n.strip() for n in agents_filter.split(",")}
-            combos = [c for c in combos if c["agent"] in a_names]
-    return combos
-
-
-@app.command()
-def run(
-    problems: Optional[str] = typer.Option(None, "--problems", help="Comma-separated problem names"),
-    models: Optional[str] = typer.Option(None, "--models", help="Comma-separated model names"),
-    agents: Optional[str] = typer.Option(None, "--agents", help="Comma-separated agent names"),
-    all_combos: bool = typer.Option(False, "--all-combos", help="Use cartesian product of all models×agents"),
-    trace_dir: Optional[str] = typer.Option(None, "--trace-dir", help="Directory for trace files (default: traces/)"),
-    no_trace: bool = typer.Option(False, "--no-trace", help="Disable independent trace file output"),
-):
-    """Run evaluations (model API calls + agent CLI calls)."""
-    config = _load_config()
-    if not config:
-        typer.echo("Error: config.yaml not found. Copy config.example.yaml to config.yaml and fill in your API keys.")
-        raise typer.Exit(1)
-
-    providers = config.get("providers", [])
-    all_problems = _discover_problems()
-    combos = _resolve_combos(config, models, agents, all_combos)
-
-    if not combos:
-        typer.echo("No combos to evaluate. Check config.yaml combos section.")
-        raise typer.Exit(1)
-
-    if problems:
-        names = {n.strip() for n in problems.split(",")}
-        all_problems = [(n, p, c) for n, p, c in all_problems if n in names]
-
-    if not all_problems:
-        typer.echo("No problems found in problems/ directory.")
-        raise typer.Exit(1)
-
-    model_map = {m["name"]: m for m in config.get("models", [])}
-    agent_map = {a["name"]: a for a in config.get("agents", [])}
-
-    trace_base = Path(trace_dir) if trace_dir else TRACES_DIR
-    ts = datetime.now().strftime("%Y-%m-%dT%H%M%S")
-
-    typer.echo(f"Running {len(combos)} combos × {len(all_problems)} problems ...")
-
-    results = {
-        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
-        "combos": [],
-    }
-
-    with tempfile.TemporaryDirectory(prefix="orangebench_") as tmpdir:
-        tmpdir_path = Path(tmpdir)
-
-        for combo in combos:
-            model_name = combo["model"]
-            agent_name = combo["agent"]
-            model_cfg = model_map.get(model_name)
-            agent_cfg = agent_map.get(agent_name)
-
-            if not model_cfg or not agent_cfg:
-                typer.echo(f"  Skipping unknown combo: {model_name} + {agent_name}")
-                continue
-
-            combo_result = {
-                "model": model_name,
-                "agent": agent_name,
-                "problems": [],
-            }
-
-            for prob_name, prob_dir, prob_config in all_problems:
-                typer.echo(f"  [{model_name}+{agent_name}] {prob_name} ... ", nl=False)
-
-                work_dir = prepare_work_dir(
-                    prob_dir,
-                    tmpdir_path / f"{model_name}__{agent_name}",
-                    prob_config,
-                )
-
-                agent_type = agent_cfg.get("type", "raw")
-                agent_wrapper = None
-                trace_result = None
-
-                if agent_type == "agent":
-                    agent_wrapper = get_agent_wrapper(agent_cfg, model_cfg)
-                    if agent_wrapper:
-                        generated_code, trace_result = agent_wrapper.run(
-                            prob_config["prompt"], work_dir, prob_name
-                        )
-                        exec_result = {
-                            "generated_code": generated_code,
-                            "duration_seconds": 0.0,
-                            "status": "pass" if generated_code else "fail",
-                            "trace": trace_result.to_dict() if trace_result else None,
-                        }
-                    else:
-                        exec_result = run_task(
-                            problem_config=prob_config,
-                            model_cfg=model_cfg,
-                            agent_cfg=agent_cfg,
-                            providers=providers,
-                            work_dir=work_dir,
-                            timeout_seconds=prob_config.get("timeout", 30),
-                        )
-                else:
-                    exec_result = run_task(
-                        problem_config=prob_config,
-                        model_cfg=model_cfg,
-                        agent_cfg=agent_cfg,
-                        providers=providers,
-                        work_dir=work_dir,
-                        timeout_seconds=prob_config.get("timeout", 30),
-                    )
-
-                trace_data = exec_result.get("trace")
-
-                if exec_result["status"] == "pass" and exec_result["generated_code"]:
-                    score_result = score_problem(
-                        problem_dir=prob_dir,
-                        work_dir=work_dir,
-                        generated_code=exec_result["generated_code"],
-                        problem_config=prob_config,
-                        trace_data=trace_data,
-                    )
-                else:
-                    score_result = {"scores": {}, "total": 0.0}
-
-                problem_result = {
-                    "name": prob_name,
-                    "scores": score_result.get("scores", {}),
-                    "total": score_result.get("total", 0.0),
-                    "status": exec_result["status"],
-                    "duration_seconds": exec_result["duration_seconds"],
-                }
-                if exec_result.get("error"):
-                    problem_result["error"] = exec_result["error"]
-                if trace_data:
-                    problem_result["trace"] = trace_data
-
-                    if not no_trace and trace_result:
-                        trace_path = trace_base / ts / f"{model_name}__{agent_name}" / f"{prob_name}.json"
-                        trace_result.save_to_file(trace_path)
-
-                combo_result["problems"].append(problem_result)
-                typer.echo(f"{exec_result['status']} (score: {score_result.get('total', 0):.2f})")
-
-            totals = [p["total"] for p in combo_result["problems"]]
-            combo_result["overall"] = round(sum(totals) / max(len(totals), 1), 4)
-            results["combos"].append(combo_result)
-
-    RESULTS_DIR.mkdir(exist_ok=True)
-    result_path = RESULTS_DIR / f"{ts}.json"
-    with open(result_path, "w") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
-    typer.echo(f"\nResults saved to {result_path}")
-    if not no_trace:
-        typer.echo(f"Trace files saved to {trace_base / ts}/")
-
-    display_results(results)
-
-
 @app.command()
 def score(
     problems: Optional[str] = typer.Option(None, "--problems", help="Comma-separated problem names (default: all)"),
     label: Optional[str] = typer.Option(None, "--label", help="Label for this evaluation run (e.g. model name)"),
-    show_trace: bool = typer.Option(False, "--trace", help="Show trace-level detail"),
 ):
     """Score already-written solutions in the repository (no API calls).
 
-    This is for the use case where a coding agent has already written solutions
-    to problems/<name>/solution.py (or the language-appropriate target file),
-    and you want to score them immediately.
+    For each problem, copies tests + scaffold into a temp directory,
+    copies the agent's solution in, runs tests, and produces a score.
+    Results are saved to results/ for historical tracking.
     """
-    import shutil
-    import sys
-    from runner.scorer import score_problem
-
     all_problems = _discover_problems()
     if problems:
         names = {n.strip() for n in problems.split(",")}
@@ -282,14 +83,12 @@ def score(
             target_file = prob_config.get("target_file", "solution.py")
             target_path = prob_dir / target_file
 
-            # Prepare a work directory: copy tests/scaffolding into tmpdir
             work_dir = prepare_work_dir(
                 prob_dir,
                 tmpdir_path / label,
                 prob_config,
             )
 
-            # Copy the agent's solution into the work dir
             work_target = work_dir / target_file
             if not target_path.exists():
                 typer.echo("SKIP (no solution file)")
@@ -311,7 +110,6 @@ def score(
                 work_dir=work_dir,
                 generated_code=generated_code,
                 problem_config=prob_config,
-                trace_data=None,
             )
 
             problem_result = {
@@ -326,7 +124,6 @@ def score(
     totals = [p["total"] for p in combo_result["problems"]]
     combo_result["overall"] = round(sum(totals) / max(len(totals), 1), 4) if totals else 0.0
 
-    # Save results
     RESULTS_DIR.mkdir(exist_ok=True)
     result_path = RESULTS_DIR / f"{ts}.json"
     with open(result_path, "w") as f:
@@ -342,7 +139,7 @@ def ranking(
 ):
     """Show historical ranking from results."""
     if not RESULTS_DIR.exists():
-        typer.echo("No results found. Run `orangebench run` or `orangebench score` first.")
+        typer.echo("No results found. Run `orangebench score` first.")
         raise typer.Exit(1)
 
     result_files = sorted(RESULTS_DIR.glob("*.json"))
@@ -379,14 +176,12 @@ def ranking(
 
 @app.command()
 def show(
-    model: Optional[str] = typer.Option(None, "--model", help="Model name"),
-    agent: Optional[str] = typer.Option(None, "--agent", help="Agent name"),
+    model: Optional[str] = typer.Option(None, "--model", help="Model/label name"),
     problem: Optional[str] = typer.Option(None, "--problem", help="Problem name"),
-    show_trace: bool = typer.Option(False, "--trace", help="Show detailed trace events"),
 ):
-    """Show detailed result for a specific combo+problem."""
+    """Show detailed result for a specific run."""
     if not RESULTS_DIR.exists():
-        typer.echo("No results found. Run `orangebench run` or `orangebench score` first.")
+        typer.echo("No results found. Run `orangebench score` first.")
         raise typer.Exit(1)
 
     result_files = sorted(RESULTS_DIR.glob("*.json"))
@@ -400,13 +195,11 @@ def show(
     for combo in results.get("combos", []):
         if model and combo["model"] != model:
             continue
-        if agent and combo["agent"] != agent:
-            continue
         if problem:
             combo["problems"] = [p for p in combo.get("problems", []) if p["name"] == problem]
 
         if combo.get("problems"):
-            display_detail(combo, show_trace=show_trace)
+            display_detail(combo)
 
 
 if __name__ == "__main__":
