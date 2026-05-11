@@ -24,11 +24,11 @@ TRACES_DIR = PROJECT_ROOT / "traces"
 
 
 def _load_config() -> dict:
+    """Load config. Returns empty dict if config.yaml doesn't exist (for score-only mode)."""
     if not CONFIG_PATH.exists():
-        typer.echo("Error: config.yaml not found. Copy config.example.yaml to config.yaml and fill in your API keys.")
-        raise typer.Exit(1)
+        return {}
     with open(CONFIG_PATH) as f:
-        return yaml.safe_load(f)
+        return yaml.safe_load(f) or {}
 
 
 def _discover_problems() -> list[tuple[str, Path, dict]]:
@@ -86,8 +86,12 @@ def run(
     trace_dir: Optional[str] = typer.Option(None, "--trace-dir", help="Directory for trace files (default: traces/)"),
     no_trace: bool = typer.Option(False, "--no-trace", help="Disable independent trace file output"),
 ):
-    """Run evaluations."""
+    """Run evaluations (model API calls + agent CLI calls)."""
     config = _load_config()
+    if not config:
+        typer.echo("Error: config.yaml not found. Copy config.example.yaml to config.yaml and fill in your API keys.")
+        raise typer.Exit(1)
+
     providers = config.get("providers", [])
     all_problems = _discover_problems()
     combos = _resolve_combos(config, models, agents, all_combos)
@@ -228,13 +232,117 @@ def run(
 
 
 @app.command()
+def score(
+    problems: Optional[str] = typer.Option(None, "--problems", help="Comma-separated problem names (default: all)"),
+    label: Optional[str] = typer.Option(None, "--label", help="Label for this evaluation run (e.g. model name)"),
+    show_trace: bool = typer.Option(False, "--trace", help="Show trace-level detail"),
+):
+    """Score already-written solutions in the repository (no API calls).
+
+    This is for the use case where a coding agent has already written solutions
+    to problems/<name>/solution.py (or the language-appropriate target file),
+    and you want to score them immediately.
+    """
+    import shutil
+    import sys
+    from runner.scorer import score_problem
+
+    all_problems = _discover_problems()
+    if problems:
+        names = {n.strip() for n in problems.split(",")}
+        all_problems = [(n, p, c) for n, p, c in all_problems if n in names]
+
+    if not all_problems:
+        typer.echo("No problems found in problems/ directory.")
+        raise typer.Exit(1)
+
+    label = label or "local-agent"
+    ts = datetime.now().strftime("%Y-%m-%dT%H%M%S")
+
+    typer.echo(f"Scoring {len(all_problems)} problems for label '{label}' ...")
+
+    results = {
+        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "combos": [
+            {
+                "model": label,
+                "agent": "local",
+                "problems": [],
+            }
+        ],
+    }
+    combo_result = results["combos"][0]
+
+    with tempfile.TemporaryDirectory(prefix="orangebench_score_") as tmpdir:
+        tmpdir_path = Path(tmpdir)
+
+        for prob_name, prob_dir, prob_config in all_problems:
+            typer.echo(f"  {prob_name} ... ", nl=False)
+
+            target_file = prob_config.get("target_file", "solution.py")
+            target_path = prob_dir / target_file
+
+            # Prepare a work directory: copy tests/scaffolding into tmpdir
+            work_dir = prepare_work_dir(
+                prob_dir,
+                tmpdir_path / label,
+                prob_config,
+            )
+
+            # Copy the agent's solution into the work dir
+            work_target = work_dir / target_file
+            if not target_path.exists():
+                typer.echo("SKIP (no solution file)")
+                combo_result["problems"].append({
+                    "name": prob_name,
+                    "scores": {},
+                    "total": 0.0,
+                    "status": "missing",
+                })
+                continue
+
+            work_target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(target_path, work_target)
+
+            generated_code = target_path.read_text()
+
+            score_result = score_problem(
+                problem_dir=prob_dir,
+                work_dir=work_dir,
+                generated_code=generated_code,
+                problem_config=prob_config,
+                trace_data=None,
+            )
+
+            problem_result = {
+                "name": prob_name,
+                "scores": score_result.get("scores", {}),
+                "total": score_result.get("total", 0.0),
+                "status": "scored",
+            }
+            combo_result["problems"].append(problem_result)
+            typer.echo(f"score: {score_result.get('total', 0):.2f}")
+
+    totals = [p["total"] for p in combo_result["problems"]]
+    combo_result["overall"] = round(sum(totals) / max(len(totals), 1), 4) if totals else 0.0
+
+    # Save results
+    RESULTS_DIR.mkdir(exist_ok=True)
+    result_path = RESULTS_DIR / f"{ts}.json"
+    with open(result_path, "w") as f:
+        json.dump(results, f, indent=2, ensure_ascii=False)
+    typer.echo(f"\nResults saved to {result_path}")
+    display_results(results)
+
+
+@app.command()
 def ranking(
     category: Optional[str] = typer.Option(None, "--category", help="Filter by problem category"),
     difficulty: Optional[str] = typer.Option(None, "--difficulty", help="Filter by difficulty"),
 ):
     """Show historical ranking from results."""
     if not RESULTS_DIR.exists():
-        typer.echo("No results found. Run `orangebench run` first.")
+        typer.echo("No results found. Run `orangebench run` or `orangebench score` first.")
         raise typer.Exit(1)
 
     result_files = sorted(RESULTS_DIR.glob("*.json"))
@@ -278,7 +386,7 @@ def show(
 ):
     """Show detailed result for a specific combo+problem."""
     if not RESULTS_DIR.exists():
-        typer.echo("No results found. Run `orangebench run` first.")
+        typer.echo("No results found. Run `orangebench run` or `orangebench score` first.")
         raise typer.Exit(1)
 
     result_files = sorted(RESULTS_DIR.glob("*.json"))
