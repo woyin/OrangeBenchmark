@@ -21,8 +21,5 @@ def score_performance(generated_code: str, work_dir: str) -> float:
     for _ in range(1_000):
         editor.undo()
     elapsed = time.perf_counter() - start
-    if elapsed < 3.0:
-        return 1.0
-    if elapsed < 8.0:
-        return 0.5
-    return 0.0
+    from runner.scorer import _continuous_performance_score
+    return _continuous_performance_score(elapsed, fast=3.0, slow=8.0)

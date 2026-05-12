@@ -1,0 +1,49 @@
+name: "dotnet-text-search"
+difficulty: medium
+category: algorithm
+tags: [dotnet, csharp, algorithm, search, tf-idf, inverted-index]
+
+prompt: |
+  Implement a TextSearchIndex class in TextSearchIndex.cs that builds an inverted index with TF-IDF scoring and boolean query support.
+
+  Define the SearchResult record: string DocId, double Score
+
+  Constructor: TextSearchIndex()
+
+  Methods:
+  - void AddDocument(string docId, string content)
+    Tokenize content by splitting on whitespace and punctuation (non-alphanumeric characters), convert to lowercase.
+    Build inverted index mapping each term to a list of (docId, count) entries.
+    Throw ArgumentException for null/empty docId or content.
+
+  - List<SearchResult> Search(string query)
+    Parse query and return ranked results (sorted by score descending).
+    Query syntax:
+      - Simple term: "hello" — find documents containing "hello", rank by TF-IDF
+      - AND: "hello AND world" — documents containing both terms, score = sum of TF-IDF for each term
+      - OR: "hello OR world" — documents containing either term, score = sum of TF-IDF for matching terms
+      - NOT: "NOT hello" — exclude documents containing "hello"
+      - Prefix: "hel*" — match terms starting with "hel", combine TF-IDF scores across matching terms
+    Operators are case-sensitive (uppercase AND, OR, NOT).
+    Return empty list for no results. Throw ArgumentException for null/empty query.
+
+  - List<string> GetDocumentsForTerm(string term)
+    Return list of doc IDs containing the term (after lowercase normalization).
+
+  - int DocumentCount — total number of indexed documents
+
+  TF-IDF formula:
+    tf(t,d) = count of t in d / total terms in d
+    idf(t) = log(N / df(t)) where N = total documents, df(t) = number of documents containing t
+    Use natural log (Math.Log).
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "TextSearchIndex.cs"
+copy_paths: ["dotnet-text-search.csproj", "TextSearchIndexTest.cs"]
+timeout: 30

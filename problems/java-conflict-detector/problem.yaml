@@ -1,0 +1,38 @@
+name: "java-conflict-detector"
+difficulty: hard
+category: aviation
+tags: [java, aviation, concurrency, spatial, haversine, 3d-collision]
+
+prompt: |
+  Implement a ConflictDetector class in src/main/java/ConflictDetector.java that detects
+  conflicts between aircraft trajectories in 3D airspace.
+
+  Define the following records/classes:
+  - Position(double lat, double lon, double alt, double timestamp) — lat/lon in degrees, alt in feet
+  - AircraftTrack(String callsign, List<Position> positions) — a track with sorted positions by timestamp
+  - Conflict(String callsign1, String callsign2, double timestamp, double horizontalDistance, double verticalDistance)
+
+  Methods to implement:
+  - `detectConflicts(List<AircraftTrack> tracks, double horizThresholdNm, double vertThresholdFt)`
+    -> List<Conflict>: Find all pairs of aircraft that come within the given horizontal (nautical miles)
+    and vertical (feet) thresholds at any interpolated point in time.
+
+  Implementation requirements:
+  - Use the Haversine formula to compute horizontal distance between lat/lon points.
+  - Use linear interpolation to estimate positions between track waypoints at shared times.
+  - Only check for conflicts at times where both tracks have valid interpolated positions.
+  - Compare callsigns lexicographically to avoid duplicate pairs (callsign1 < callsign2).
+  - Earth radius for Haversine: 3440.065 nautical miles.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/ConflictDetector.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 60

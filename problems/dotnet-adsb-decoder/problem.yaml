@@ -1,0 +1,40 @@
+name: "dotnet-adsb-decoder"
+difficulty: hard
+category: aviation
+tags: [dotnet, csharp, aviation, ads-b, binary-parsing, crc]
+
+prompt: |
+  Implement an AdsbDecoder class in AdsbDecoder.cs that decodes Mode S ADS-B messages (DF=17, 1090ES).
+  Given a hex string representing an ADS-B message:
+
+  - Extract DF (downlink format, bits 0-4), CA (capability, bits 5-7), ICAO address (6 hex chars from bits 8-31)
+  - Parse Type Code (TC, bits 32-36) to determine message type
+  - TC 1-4: Aircraft identification (callsign), extract 8-character callsign from the 6-bit character encoding
+  - TC 9-18: Airborne position, decode CPR (Compact Position Reporting) format, extract altitude (in feet)
+  - TC 19: Airborne velocity, extract ground speed (knots) and track angle (degrees)
+  - Validate CRC using the Mode S CRC polynomial, return isValid boolean
+
+  The AdsbMessage record should contain:
+  - DownlinkFormat (int), Capability (int), ICAO (string), TypeCode (int)
+  - Callsign (string?), AltitudeFeet (double?), Latitude (double?), Longitude (double?)
+  - GroundSpeedKnots (double?), TrackAngle (double?), IsValid (bool)
+
+  Methods:
+  - static AdsbMessage Decode(string hexMessage) — parse all fields from hex message
+  - static bool ValidateCrc(string hexMessage) — CRC check using Mode S polynomial
+  - static string DecodeCallsign(ulong data) — decode 6-bit packed callsign from ME field
+
+  Throw ArgumentException for null/empty/short messages (less than 28 hex chars = 14 bytes).
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "AdsbDecoder.cs"
+copy_paths: ["dotnet-adsb-decoder.csproj", "AdsbDecoderTest.cs"]
+timeout: 60

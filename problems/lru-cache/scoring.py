@@ -20,8 +20,5 @@ def score_performance(generated_code: str, work_dir: str) -> float:
         cache.get(i)
         cache.get(i - 1)
     elapsed = time.perf_counter() - start
-    if elapsed < 1.0:
-        return 1.0
-    if elapsed < 3.0:
-        return 0.5
-    return 0.0
+    from runner.scorer import _continuous_performance_score
+    return _continuous_performance_score(elapsed, fast=1.0, slow=3.0)

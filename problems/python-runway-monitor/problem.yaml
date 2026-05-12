@@ -1,0 +1,70 @@
+name: "python-runway-monitor"
+difficulty: medium
+category: aviation
+tags: [geometry, aviation, real-time, monitoring, performance]
+
+prompt: |
+  Implement a runway incursion detection system in solution.py. Given an airport
+  layout (runways, taxiways, crossing points) and a stream of aircraft position
+  updates, detect when an aircraft enters an active runway without authorization.
+
+  Airport Layout Model:
+  - A Runway has a name (e.g., "09L/27R"), two endpoints as (x, y) coordinates,
+    and a width.
+  - A Taxiway has a name, a list of points forming a path, and a width.
+  - A RunwayCrossing defines where a taxiway crosses a runway with keys:
+    taxiway (str), runway (str), point (tuple[float, float]).
+  - An ActiveRunway is a runway currently in use with an active direction ("A" or "B").
+
+  Position Tracking:
+  - AircraftPosition(callsign, x, y, timestamp, on_ground: bool)
+  - Track aircraft positions over time.
+
+  Detection Logic:
+  - An incursion occurs when an aircraft on the ground enters an active runway
+    zone without being on an authorized crossing.
+  - A runway zone is a rectangle along the runway centerline extending width/2
+    on each side perpendicular to the runway.
+  - Aircraft is "in zone" if its position falls within the runway rectangle.
+  - Authorized crossings: aircraft on a designated taxiway that crosses the
+    runway, and the crossing is "active" (explicitly opened by ATC).
+
+  Required Classes and Methods:
+    class Runway:
+        name: str, endpoint_a: tuple[float, float], endpoint_b: tuple[float, float],
+        width: float
+
+    class Taxiway:
+        name: str, points: list[tuple[float, float]], width: float
+
+    class AirportLayout:
+        runways: list[Runway], taxiways: list[Taxiway],
+        crossings: list[dict]  # {"taxiway": str, "runway": str, "point": (x, y)}
+
+    class Alert:
+        alert_type: str, callsign: str, runway_name: str,
+        position: tuple[float, float], timestamp: float, message: str
+
+    class RunwayMonitor:
+        __init__(layout: AirportLayout)
+        set_active_runway(runway_name: str, direction: str)  # "A" or "B"
+        set_crossing_active(taxiway_name: str, runway_name: str, active: bool)
+        update_position(pos: AircraftPosition) -> list[Alert]
+        get_active_runways() -> list[str]
+        is_in_runway_zone(x: float, y: float, runway_name: str) -> bool
+        get_nearby_aircraft(runway_name: str, radius: float) -> list[AircraftPosition]
+
+  Use dataclasses for all data classes. Use from __future__ import annotations
+  for forward references in type hints.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

@@ -25,5 +25,15 @@ uv.lock
 # Pytest cache
 .pytest_cache/
 
+# Java / Maven
+target/
+
+# .NET
+bin/
+obj/
+
+# Rust
+target/
+
 # Local git worktrees
 .worktrees/

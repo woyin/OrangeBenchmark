@@ -1,0 +1,41 @@
+name: "java-expression-evaluator"
+difficulty: medium
+category: algorithm
+tags: [java, parsing, math, expression, shunting-yard]
+
+prompt: |
+  Implement an ExpressionEvaluator class in src/main/java/ExpressionEvaluator.java that evaluates
+  mathematical expressions.
+
+  Supported features:
+  - Binary operators: +, -, *, /, ^ (power, right-associative)
+  - Unary minus: e.g. "-5", "-(3+2)"
+  - Parentheses: ( and )
+  - Variables: provided via a Map<String, Double>. Common variables like "pi" and "e" should
+    have built-in defaults (Math.PI and Math.E).
+  - Functions: sin(), cos(), tan(), sqrt(), abs(), log() (natural log), exp()
+
+  Methods to implement:
+  - `double evaluate(String expression, Map<String, Double> variables)`: Evaluate the expression
+    with the given variable bindings. Throw IllegalArgumentException for undefined variables
+    or invalid expressions. Throw ArithmeticException for division by zero.
+  - `double evaluate(String expression)`: Evaluate without external variables (built-in pi/e still work).
+    Throw IllegalArgumentException if the expression references undefined variables.
+
+  Operator precedence (lowest to highest):
+  1. +, - (addition, subtraction)
+  2. *, / (multiplication, division)
+  3. ^ (power, right-associative)
+  4. Unary - (negation)
+  5. Functions and parentheses
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "src/main/java/ExpressionEvaluator.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

@@ -1,0 +1,41 @@
+name: "dotnet-crew-scheduler"
+difficulty: hard
+category: aviation
+tags: [dotnet, csharp, aviation, scheduling, constraint-satisfaction]
+
+prompt: |
+  Implement a CrewScheduler class in CrewScheduler.cs that schedules airline crew to flight segments respecting constraints.
+
+  Define the following types:
+  - FlightSegment record with: string FlightId, DateTime DepartureTime, DateTime ArrivalTime, string Origin, string Destination, string AircraftType
+  - CrewMember record with: string Id, HashSet<string> Qualifications
+  - ScheduleResult record with: Dictionary<string, List<FlightSegment>> Assignments, int CoveredFlights, int TotalFlights
+
+  Constraints:
+  - A crew can only be assigned to segments matching their qualifications (e.g., "B737" qualification for B737 flights)
+  - A crew cannot exceed maxDutyHours hours of duty in any rolling 24h window (duty = time between first departure and last arrival)
+  - A crew must have at least minRestHours hours of rest between the arrival of one segment and the departure of the next
+  - A crew cannot be assigned overlapping flights (a flight's departure must be after the previous flight's arrival plus rest)
+
+  Methods:
+  - ScheduleResult Schedule(List<FlightSegment> flights, List<CrewMember> crew, int maxDutyHours, int minRestHours)
+    Assign flights to crew greedily. Sort flights by departure time. For each flight, find the first available qualified crew member.
+  - static bool IsValidSchedule(Dictionary<string, List<FlightSegment>> schedule, int maxDutyHours, int minRestHours)
+    Validate that no constraint is violated. Check each crew's assignments are sorted by time, have required rest, and don't exceed duty hours.
+  - static int GetCoveragePercent(Dictionary<string, List<FlightSegment>> schedule, List<FlightSegment> allFlights)
+    Return the percentage (0-100) of flights that are covered by the schedule.
+
+  Use TimeSpan for time calculations. Handle edge cases: empty lists return empty schedule, null inputs should throw ArgumentNullException.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "CrewScheduler.cs"
+copy_paths: ["dotnet-crew-scheduler.csproj", "CrewSchedulerTest.cs"]
+timeout: 60

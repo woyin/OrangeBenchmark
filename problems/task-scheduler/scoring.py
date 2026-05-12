@@ -31,9 +31,9 @@ def score_performance(generated_code: str, work_dir: str) -> float:
     parallel.run_all()
     parallel_elapsed = time.perf_counter() - start
 
-    ratio = parallel_elapsed / serial_elapsed
-    if ratio < 0.6:
+    ratio = parallel_elapsed / max(serial_elapsed, 0.001)
+    if ratio <= 0.4:
         return 1.0
-    if ratio < 0.9:
-        return 0.5
-    return 0.0
+    if ratio >= 1.0:
+        return 0.0
+    return round(1.0 - (ratio - 0.4) / 0.6, 4)

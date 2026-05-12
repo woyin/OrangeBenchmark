@@ -1,0 +1,39 @@
+name: "java-graph-shortest-path"
+difficulty: medium
+category: algorithm
+tags: [java, graph, dijkstra, shortest-path, weighted-graph]
+
+prompt: |
+  Implement a Graph class in src/main/java/Graph.java that represents a weighted directed graph
+  and provides Dijkstra's shortest path algorithm.
+
+  Constructor:
+  - `Graph()` — creates an empty graph.
+
+  Methods:
+  - `void addEdge(String from, String to, double weight)` — add a directed edge. Throw
+    IllegalArgumentException if weight is negative.
+  - `void addUndirectedEdge(String from, String to, double weight)` — add edges in both directions.
+  - `double shortestPath(String from, String to)` — returns the shortest distance, or -1.0 if
+    there is no path. Throw IllegalArgumentException if either node is not in the graph.
+  - `List<String> shortestPathNodes(String from, String to)` — returns the ordered list of node
+    names in the shortest path, or an empty list if no path. Throw IllegalArgumentException if
+    either node is not in the graph.
+  - `boolean hasPath(String from, String to)` — true if a path exists. Throw
+    IllegalArgumentException if either node is not in the graph.
+
+  Implementation notes:
+  - Use Dijkstra's algorithm with a priority queue.
+  - The same source and target node should return distance 0.0 and a list containing just that node.
+  - Nodes are identified by String names. Nodes are implicitly added when edges are created.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "src/main/java/Graph.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

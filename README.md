@@ -38,9 +38,20 @@ OrangeBenchmark/
 │   ├── log-analyzer/        # medium, data, Python
 │   ├── text-editor/         # hard, algorithm, Python
 │   ├── task-scheduler/      # hard, system, Python
-│   ├── wasm-calculator/     # hard, multi-lang, Rust/Wasm
-│   ├── java-reverse-string/ # easy, string, Java
-│   └── dotnet-fizz-buzz/    # easy, algorithm, .NET/C#
+│   ├── python-runway-monitor/ # medium, aviation, Python
+│   ├── java-reverse-string/   # easy, string, Java
+│   ├── java-flight-plan-parser/ # medium, aviation, Java
+│   ├── java-conflict-detector/  # hard, aviation, Java
+│   ├── java-expression-evaluator/ # medium, algorithm, Java
+│   ├── java-concurrent-queue/    # hard, concurrency, Java
+│   ├── java-graph-shortest-path/ # medium, algorithm, Java
+│   ├── dotnet-fizz-buzz/      # easy, algorithm, .NET/C#
+│   ├── dotnet-adsb-decoder/   # hard, aviation, .NET/C#
+│   ├── dotnet-crew-scheduler/ # hard, aviation, .NET/C#
+│   ├── dotnet-json-transform/ # medium, data, .NET/C#
+│   ├── dotnet-rate-limiter/   # hard, concurrency, .NET/C#
+│   ├── dotnet-text-search/    # medium, algorithm, .NET/C#
+│   └── wasm-calculator/       # hard, multi-lang, Rust/Wasm
 ├── runner/                  # 评分引擎
 ├── results/                 # 历史评测结果 (JSON)
 └── tests/                   # 测试
@@ -88,33 +99,61 @@ uv run orangebench show --model "gpt-4o"
 
 ## 题目列表
 
-| # | 题目 | 难度 | 类别 | 语言 | 评分维度 |
-|---|------|------|------|------|---------|
-| 1 | two-sum | easy | algorithm | Python | correctness, code_quality |
-| 2 | csv-stats | easy | data | Python | correctness, code_quality |
-| 3 | url-parser | easy | string | Python | correctness, code_quality |
-| 4 | lru-cache | medium | algorithm | Python | correctness, code_quality, performance |
-| 5 | rest-api | medium | api | Python | correctness, code_quality |
-| 6 | log-analyzer | medium | data | Python | correctness, code_quality, performance |
-| 7 | text-editor | hard | algorithm | Python | correctness, code_quality, performance |
-| 8 | task-scheduler | hard | system | Python | correctness, code_quality, performance |
-| 9 | wasm-calculator | hard | multi-lang | Rust | correctness, code_quality, performance |
-| 10 | java-reverse-string | easy | string | Java | correctness, code_quality |
-| 11 | dotnet-fizz-buzz | easy | algorithm | .NET/C# | correctness, code_quality |
+### Python
+
+| # | 题目 | 难度 | 类别 | 评分维度 |
+|---|------|------|------|---------|
+| 1 | two-sum | easy | algorithm | correctness, code_quality |
+| 2 | csv-stats | easy | data | correctness, code_quality |
+| 3 | url-parser | easy | string | correctness, code_quality |
+| 4 | lru-cache | medium | algorithm | correctness, code_quality, performance |
+| 5 | rest-api | medium | api | correctness, code_quality |
+| 6 | log-analyzer | medium | data | correctness, code_quality, performance |
+| 7 | text-editor | hard | algorithm | correctness, code_quality, performance |
+| 8 | task-scheduler | hard | system | correctness, code_quality, performance |
+| 9 | python-runway-monitor | medium | aviation | correctness, code_quality, performance |
+
+### Java
+
+| # | 题目 | 难度 | 类别 | 评分维度 |
+|---|------|------|------|---------|
+| 10 | java-reverse-string | easy | string | correctness, code_quality |
+| 11 | java-flight-plan-parser | medium | aviation | correctness, code_quality |
+| 12 | java-conflict-detector | hard | aviation | correctness, code_quality, performance |
+| 13 | java-expression-evaluator | medium | algorithm | correctness, code_quality |
+| 14 | java-concurrent-queue | hard | concurrency | correctness, code_quality, performance |
+| 15 | java-graph-shortest-path | medium | algorithm | correctness, code_quality |
+
+### .NET / C#
+
+| # | 题目 | 难度 | 类别 | 评分维度 |
+|---|------|------|------|---------|
+| 16 | dotnet-fizz-buzz | easy | algorithm | correctness, code_quality |
+| 17 | dotnet-adsb-decoder | hard | aviation | correctness, code_quality, performance |
+| 18 | dotnet-crew-scheduler | hard | aviation | correctness, code_quality, performance |
+| 19 | dotnet-json-transform | medium | data | correctness, code_quality |
+| 20 | dotnet-rate-limiter | hard | concurrency | correctness, code_quality, performance |
+| 21 | dotnet-text-search | medium | algorithm | correctness, code_quality |
+
+### Rust
+
+| # | 题目 | 难度 | 类别 | 评分维度 |
+|---|------|------|------|---------|
+| 22 | wasm-calculator | hard | multi-lang | correctness, code_quality, performance |
 
 ## 评分维度
 
 | 维度 | 说明 | 默认行为 |
 |------|------|---------|
-| correctness | 代码正确性 | 运行测试，计算通过率 |
-| code_quality | 代码质量 | Python: ruff 检查; Java: mvn compile; .NET: dotnet build 警告数 |
-| performance | 运行性能 | 自定义（部分题目有） |
+| correctness | 代码正确性 | 运行测试，非线性通过率 |
+| code_quality | 代码质量 | Python: lint + 类型注解 + 复杂度 + docstring; Java: mvn compile; .NET: dotnet build 警告数 |
+| performance | 运行性能 | 连续评分（部分题目有自定义基准测试） |
 
 ## 添加新题目
 
 1. 复制 `problems/_template/` 为新目录
-2. 编辑 `problem.yaml`：设置 name、difficulty、category、prompt、target_file
-3. 编写 `tests/test_solution.py`
+2. 编辑 `problem.yaml`：设置 name、difficulty、category、prompt、target_file、copy_paths
+3. 编写测试用例
 4. 可选：添加 `scoring.py` 自定义评分逻辑
 
 ## 依赖

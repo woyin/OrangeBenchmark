@@ -1,0 +1,37 @@
+name: "dotnet-rate-limiter"
+difficulty: hard
+category: concurrency
+tags: [dotnet, csharp, concurrency, rate-limiting, thread-safety]
+
+prompt: |
+  Implement a RateLimiter class in RateLimiter.cs that supports two rate-limiting modes, both thread-safe.
+
+  **Sliding Window**: Allow N requests per window of T seconds. Track request timestamps and remove expired ones on each check.
+  **Token Bucket**: Tokens replenish at rate R tokens/sec, max burst B tokens. Each request consumes 1 or more tokens.
+
+  Factory methods (use a private constructor):
+  - static RateLimiter CreateSlidingWindow(int maxRequests, TimeSpan window)
+  - static RateLimiter CreateTokenBucket(int maxBurst, double refillRatePerSecond)
+
+  Instance methods:
+  - bool TryAcquire() — acquire 1 permit, return true if allowed
+  - bool TryAcquire(int permits) — acquire N permits, return true if allowed
+  - int GetAvailablePermits() — return current available count
+
+  Thread safety: All methods must be safe for concurrent calls from multiple threads.
+  Use lock or other synchronization primitive. Do not use async.
+
+  Throw ArgumentException for invalid parameters (maxRequests <= 0, maxBurst <= 0, refillRate <= 0, permits <= 0).
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "RateLimiter.cs"
+copy_paths: ["dotnet-rate-limiter.csproj", "RateLimiterTest.cs"]
+timeout: 60

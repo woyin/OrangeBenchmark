@@ -1,0 +1,41 @@
+name: "dotnet-json-transform"
+difficulty: medium
+category: data
+tags: [dotnet, csharp, json, transformation, data-processing]
+
+prompt: |
+  Implement a JsonTransformer class in JsonTransformer.cs that transforms JSON documents using a rule-based engine. Use System.Text.Json.
+
+  Supported rule operations (each rule is a JSON object with an operation key):
+  - {"$select": "path.to.field"} — extract a specific field by dot-separated path
+  - {"$rename": {"oldName": "newName"}} — rename fields at current level
+  - {"$filter": {"field": "status", "equals": "active"}} — filter array elements where field equals value
+  - {"$map": {"field": "items", "select": "name"}} — map array elements, extracting one field from each
+
+  Rules are provided as a JSON array of rule objects.
+
+  Methods:
+  - static string Transform(string inputJson, string rulesJson)
+    Parse inputJson as a JsonDocument, apply each rule in sequence, return the transformed JSON string.
+  - static JsonElement Select(JsonElement root, string path)
+    Navigate the JSON element by dot-separated path, return the found element.
+
+  Behavior:
+  - If $select is used, the result is the selected value (could be object, array, or primitive)
+  - If $rename is used, rename matching keys at the current object level
+  - If $filter is used on an array, return only elements matching the condition
+  - If $map is used on an array, return a new array with only the selected field from each element
+  - Multiple rules are applied in sequence (pipeline)
+  - Return the original JSON if no rules match or rules array is empty
+  - Throw ArgumentException for null/empty inputs
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "JsonTransformer.cs"
+copy_paths: ["dotnet-json-transform.csproj", "JsonTransformerTest.cs"]
+timeout: 30

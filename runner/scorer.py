@@ -1,6 +1,8 @@
 """Score generated code against problem criteria."""
 
+import ast
 import importlib.util
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -16,7 +18,6 @@ def _run_pytest(work_dir: Path) -> tuple[int, int]:
             timeout=30,
         )
         output = result.stdout + result.stderr
-        import re
         m_passed = re.search(r"(\d+) passed", output)
         m_failed = re.search(r"(\d+) failed", output)
         passed = int(m_passed.group(1)) if m_passed else 0
@@ -38,9 +39,9 @@ def _run_ruff_check(file_path: Path) -> int:
             text=True,
             timeout=10,
         )
-        if result.stdout.strip():
-            return len([line for line in result.stdout.strip().split("\n") if line.strip()])
-        return 0
+        if result.returncode == 0:
+            return 0
+        return len([line for line in result.stdout.strip().split("\n") if line.strip()])
     except Exception:
         return 0
 
@@ -58,7 +59,17 @@ def _run_maven_test(work_dir: Path) -> float:
             text=True,
             timeout=60,
         )
-        return 1.0 if result.returncode == 0 else 0.0
+        if result.returncode == 0:
+            return 1.0
+        output = result.stdout + result.stderr
+        m = re.search(r"Tests run:\s*(\d+).*Failures:\s*(\d+)", output)
+        if m:
+            total = int(m.group(1))
+            failures = int(m.group(2))
+            passed = total - failures
+            if total > 0:
+                return round((passed / total) ** 1.5, 4)
+        return 0.0
     except Exception:
         return 0.0
 
@@ -121,6 +132,141 @@ def _run_dotnet_build_quality(work_dir: Path) -> float:
         return round(max(0.0, 1.0 - warnings * 0.1), 4)
     except Exception:
         return 0.0
+
+
+def _continuous_performance_score(
+    elapsed: float, fast: float, slow: float, ok: bool = True
+) -> float:
+    """Continuous performance score from elapsed time.
+
+    Returns 1.0 if elapsed <= fast, linearly interpolated to 0.3
+    at slow threshold, 0.0 if elapsed >= slow or ok is False.
+    """
+    if not ok:
+        return 0.0
+    if elapsed <= fast:
+        return 1.0
+    if elapsed >= slow:
+        return 0.0
+    t = (elapsed - fast) / (slow - fast)
+    return round(1.0 - 0.7 * t, 4)
+
+
+def _ruff_lint_score(file_path: Path) -> float:
+    """Lint score from ruff, normalized by lines of code."""
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "ruff", "check", str(file_path),
+             "--output-format", "json"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            return 1.0
+        issues = []
+        try:
+            import json
+            issues = json.loads(result.stdout) if result.stdout.strip() else []
+        except Exception:
+            pass
+        issue_count = len(issues) if isinstance(issues, list) else 0
+        loc = max(len(file_path.read_text().strip().split("\n")), 1)
+        return round(max(0.0, 1.0 - (issue_count / max(loc / 10, 1)) * 0.3), 4)
+    except Exception:
+        return 0.5
+
+
+def _type_hint_score(file_path: Path) -> float:
+    """Score based on type annotation coverage of public function parameters and returns."""
+    try:
+        source = file_path.read_text()
+        tree = ast.parse(source)
+
+        total_params = 0
+        hinted_params = 0
+        total_returns = 0
+        hinted_returns = 0
+
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            if node.name.startswith("_") and not node.name.startswith("__"):
+                continue
+            for arg in node.args.args:
+                if arg.arg == "self":
+                    continue
+                total_params += 1
+                if arg.annotation is not None:
+                    hinted_params += 1
+            total_returns += 1
+            if node.returns is not None:
+                hinted_returns += 1
+
+        if total_params + total_returns == 0:
+            return 0.8
+        param_score = hinted_params / max(total_params, 1)
+        return_score = hinted_returns / max(total_returns, 1)
+        return round(0.6 * param_score + 0.4 * return_score, 4)
+    except Exception:
+        return 0.5
+
+
+def _complexity_score(file_path: Path) -> float:
+    """Score based on cyclomatic complexity relative to lines of code."""
+    try:
+        source = file_path.read_text()
+        tree = ast.parse(source)
+
+        complexity = 1
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.If, ast.For, ast.While, ast.ExceptHandler)):
+                complexity += 1
+            elif isinstance(node, ast.BoolOp):
+                complexity += len(node.values) - 1
+
+        loc = max(len(source.strip().split("\n")), 1)
+        ratio = complexity / loc
+        if ratio <= 0.2:
+            return 1.0
+        if ratio <= 0.5:
+            return round(1.0 - (ratio - 0.2) / 0.3 * 0.3, 4)
+        return round(max(0.0, 0.7 - (ratio - 0.5) * 0.6), 4)
+    except Exception:
+        return 0.5
+
+
+def _docstring_score(file_path: Path) -> float:
+    """Score based on docstring coverage of public functions/classes."""
+    try:
+        source = file_path.read_text()
+        tree = ast.parse(source)
+
+        public_count = 0
+        docstring_count = 0
+
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if node.name.startswith("_") and not node.name.startswith("__"):
+                    continue
+                public_count += 1
+                if (node.body
+                        and isinstance(node.body[0], ast.Expr)
+                        and isinstance(node.body[0].value, ast.Constant)
+                        and isinstance(node.body[0].value.value, str)):
+                    docstring_count += 1
+            elif isinstance(node, ast.ClassDef):
+                if not node.name.startswith("_"):
+                    public_count += 1
+                    if (node.body
+                            and isinstance(node.body[0], ast.Expr)
+                            and isinstance(node.body[0].value, ast.Constant)
+                            and isinstance(node.body[0].value.value, str)):
+                        docstring_count += 1
+
+        if public_count == 0:
+            return 0.8
+        return round(docstring_count / public_count, 4)
+    except Exception:
+        return 0.5
 
 
 def _load_custom_scorer(problem_dir: Path):
@@ -195,7 +341,8 @@ def _default_correctness(work_dir: Path) -> float:
     if _detect_dotnet(work_dir):
         return _run_dotnet_test(work_dir)
     passed, total = _run_pytest(work_dir)
-    return round(passed / total, 4)
+    raw = passed / total
+    return round(raw ** 1.5, 4)
 
 
 def _default_code_quality(target_path: Path, work_dir: Path) -> float:
@@ -206,7 +353,8 @@ def _default_code_quality(target_path: Path, work_dir: Path) -> float:
         return _run_dotnet_build_quality(work_dir)
     if not target_path.exists():
         return 0.0
-    issues = _run_ruff_check(target_path)
-    if issues == 0:
-        return 1.0
-    return round(max(0.0, 1.0 - issues * 0.1), 4)
+    lint = _ruff_lint_score(target_path)
+    type_hints = _type_hint_score(target_path)
+    complexity = _complexity_score(target_path)
+    docs = _docstring_score(target_path)
+    return round(0.35 * lint + 0.30 * type_hints + 0.20 * complexity + 0.15 * docs, 4)

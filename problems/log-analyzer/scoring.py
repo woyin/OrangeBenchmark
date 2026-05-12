@@ -27,10 +27,8 @@ def score_performance(generated_code: str, work_dir: str) -> float:
     start = time.perf_counter()
     result = module.analyze_log(str(log_path))
     elapsed = time.perf_counter() - start
-    if result.get("total_requests") != 100_000:
-        return 0.0
-    if elapsed < 2.0:
-        return 1.0
-    if elapsed < 5.0:
-        return 0.5
-    return 0.0
+    from runner.scorer import _continuous_performance_score
+    return _continuous_performance_score(
+        elapsed, fast=2.0, slow=5.0,
+        ok=result.get("total_requests") == 100_000,
+    )

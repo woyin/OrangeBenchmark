@@ -1,0 +1,43 @@
+name: "java-flight-plan-parser"
+difficulty: medium
+category: aviation
+tags: [java, parsing, aviation, icao, flight-plan]
+
+prompt: |
+  Implement a FlightPlanParser class in src/main/java/FlightPlanParser.java that parses
+  simplified ICAO flight plan route strings.
+
+  A route string consists of space-separated segments. Each segment is either:
+  - A single WAYPOINT name (direct to waypoint)
+  - WAYPOINT.AIRWAY.WAYPOINT (airway segment between two waypoints)
+
+  Example route: "KJFK JFK.V1.DIKES DIKES ULW700 KOISE KOISE.V3.KLAX KLAX"
+
+  You must also define:
+  - A `RouteSegment` class (can be a static inner class) with fields:
+    - `type` (String: "DIRECT" or "AIRWAY")
+    - `from` (String: departure waypoint)
+    - `to` (String: arrival waypoint)
+    - `airway` (String: airway name, null for DIRECT segments)
+
+  Methods to implement:
+  - `parseRoute(String route)` -> List<RouteSegment>: Parse the full route string into segments.
+  - `getWaypoints(String route)` -> List<String>: Return ordered list of all unique waypoints
+    encountered in the route, preserving first-occurrence order.
+  - `getAirwaySegments(String route)` -> List<RouteSegment>: Return only the airway segments.
+
+  Handle edge cases:
+  - Empty string returns empty list.
+  - Null input returns empty list.
+  - Single waypoint returns one DIRECT segment.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.6
+    - name: code_quality
+      weight: 0.4
+
+target_file: "src/main/java/FlightPlanParser.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

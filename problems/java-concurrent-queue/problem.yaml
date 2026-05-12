@@ -1,0 +1,49 @@
+name: "java-concurrent-queue"
+difficulty: hard
+category: concurrency
+tags: [java, concurrency, blocking-queue, threads, producer-consumer]
+
+prompt: |
+  Implement a BoundedBlockingQueue<T> class in src/main/java/BoundedBlockingQueue.java — a generic
+  bounded blocking queue using only Java monitors (synchronized, wait, notifyAll).
+
+  Constructor:
+  - `BoundedBlockingQueue(int capacity)` — creates a queue with the given fixed capacity. Throw
+    IllegalArgumentException if capacity <= 0.
+
+  Methods:
+  - `void put(T item) throws InterruptedException` — add an item, blocking if the queue is full.
+    Must respond to interruption by clearing interrupted status and throwing InterruptedException.
+  - `T take() throws InterruptedException` — remove and return the head, blocking if empty.
+    Must respond to interruption by clearing interrupted status and throwing InterruptedException.
+  - `boolean tryPut(T item, long timeoutMs) throws InterruptedException` — try to add an item,
+    waiting up to timeoutMs. Returns true if successful, false if timeout elapsed. Timeout <= 0
+    means no wait (return immediately if full).
+  - `boolean tryTake(java.util.function.Consumer<T> consumer, long timeoutMs) throws InterruptedException`
+    — try to take an item and pass it to the consumer, waiting up to timeoutMs. Returns true if
+    successful, false if timeout elapsed.
+  - `int size()` — current number of items in the queue.
+  - `int remainingCapacity()` — capacity minus size.
+  - `boolean isEmpty()` — true if size is 0.
+  - `boolean isFull()` — true if size equals capacity.
+
+  Requirements:
+  - Use a LinkedList as the internal buffer.
+  - Must be fair: FIFO ordering for both items and waiting threads.
+  - Must handle spurious wakeups with while loops.
+  - Must preserve thread interruption: if interrupted during wait(), clear the interrupted status
+    and throw InterruptedException.
+  - Throw NullPointerException if put() or tryPut() is called with a null item.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/BoundedBlockingQueue.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 60
