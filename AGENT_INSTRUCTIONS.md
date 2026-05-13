@@ -2,6 +2,10 @@
 
 You are being evaluated on your ability to solve coding problems. Follow these instructions carefully.
 
+## Environment Requirements
+
+- All Python problems must use `uv` for environment management and dependency resolution.
+
 ## Your Task
 
 For each problem listed below, read the `problem.yaml` file to understand the requirements, then implement the solution in the specified `target_file`.
