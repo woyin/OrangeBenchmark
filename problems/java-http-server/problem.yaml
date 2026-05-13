@@ -1,0 +1,52 @@
+name: "java-http-server"
+difficulty: hard
+category: system
+tags: [java, nio, http, server, concurrency]
+
+prompt: |
+  Implement a SimpleHttpServer class in src/main/java/SimpleHttpServer.java using Java NIO
+  (java.nio.channels). The server must handle HTTP/1.1 GET and POST requests.
+
+  Constructor: SimpleHttpServer(int port) — create a server bound to the given port.
+
+  Methods:
+  - void start() — start accepting connections in a non-blocking loop.
+  - void stop() — gracefully shut down the server and release resources.
+  - void get(String path, HttpHandler handler) — register a GET handler.
+  - void post(String path, HttpHandler handler) — register a POST handler.
+
+  Define a HttpHandler interface:
+  - HttpResponse handle(HttpRequest request)
+
+  Define HttpRequest with fields:
+  - String method
+  - String path
+  - Map<String, String> headers
+  - String body
+
+  Define HttpResponse with:
+  - int statusCode
+  - String body
+  - static HttpResponse ok(String body) — 200 response
+  - static HttpResponse notFound() — 404 response
+  - static HttpResponse badRequest(String message) — 400 response
+
+  Requirements:
+  - Use ServerSocketChannel and Selector for non-blocking I/O.
+  - Must handle at least 10 concurrent connections.
+  - Must correctly parse HTTP request headers and body.
+  - Unregistered paths return 404.
+  - Must properly decode percent-encoded query parameters in path.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/SimpleHttpServer.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 60

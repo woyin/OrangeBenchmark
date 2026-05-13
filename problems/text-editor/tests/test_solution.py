@@ -82,3 +82,46 @@ def test_large_document_operations():
     assert editor.get_text().endswith("9999!")
     editor.undo()
     assert editor.get_text().endswith("9999")
+
+
+def test_deep_undo_redo_chain():
+    editor = TextEditor()
+    for i in range(50):
+        editor.insert(0, 0, f"line{i}\n")
+    for _ in range(50):
+        editor.undo()
+    assert editor.get_text() == ""
+    for _ in range(50):
+        editor.redo()
+    assert editor.get_text().startswith("line49")
+
+
+def test_empty_string_operations():
+    editor = TextEditor()
+    editor.insert(0, 0, "")
+    assert editor.get_text() == ""
+    editor.undo()
+    assert editor.get_text() == ""
+
+
+def test_replace_with_longer_text():
+    editor = TextEditor()
+    editor.insert(0, 0, "hello world")
+    editor.replace(0, 6, 5, "universe and beyond")
+    assert editor.get_text() == "hello universe and beyond"
+
+
+def test_delete_at_end_of_line():
+    editor = TextEditor()
+    editor.insert(0, 0, "line1\nline2\nline3")
+    editor.delete(1, 0, 5)
+    assert editor.get_text() == "line1\n\nline3"
+
+
+def test_unicode_multibyte():
+    editor = TextEditor()
+    editor.insert(0, 0, "你好世界")
+    editor.insert(0, 2, "🎉")
+    assert "🎉" in editor.get_text()
+    editor.undo()
+    assert editor.get_text() == "你好世界"

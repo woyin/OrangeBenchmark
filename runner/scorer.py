@@ -68,7 +68,7 @@ def _run_maven_test(work_dir: Path) -> float:
             failures = int(m.group(2))
             passed = total - failures
             if total > 0:
-                return round((passed / total) ** 1.5, 4)
+                return round((passed / total) ** 2.0, 4)
         return 0.0
     except Exception:
         return 0.0
@@ -269,6 +269,45 @@ def _docstring_score(file_path: Path) -> float:
         return 0.5
 
 
+def _error_handling_score(file_path: Path) -> float:
+    """Score based on presence of error handling (try/except, raise, input validation)."""
+    try:
+        source = file_path.read_text()
+        tree = ast.parse(source)
+
+        public_funcs = []
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if node.name.startswith("_") and not node.name.startswith("__"):
+                    continue
+                public_funcs.append(node)
+
+        if not public_funcs:
+            return 0.8
+
+        handled = 0
+        for func in public_funcs:
+            has_try = False
+            has_raise = False
+            has_if_validation = False
+            for child in ast.walk(func):
+                if isinstance(child, ast.Try):
+                    has_try = True
+                if isinstance(child, ast.Raise):
+                    has_raise = True
+                if isinstance(child, ast.If):
+                    for sub in ast.walk(child):
+                        if isinstance(sub, ast.Call) and isinstance(sub.func, ast.Name):
+                            if sub.func.id in ("isinstance", "type", "len", "hasattr"):
+                                has_if_validation = True
+            if has_try or has_raise or has_if_validation:
+                handled += 1
+
+        return round(handled / len(public_funcs), 4)
+    except Exception:
+        return 0.5
+
+
 def _load_custom_scorer(problem_dir: Path):
     """Load custom scoring.py from problem directory if it exists."""
     scoring_path = problem_dir / "scoring.py"
@@ -342,7 +381,7 @@ def _default_correctness(work_dir: Path) -> float:
         return _run_dotnet_test(work_dir)
     passed, total = _run_pytest(work_dir)
     raw = passed / total
-    return round(raw ** 1.5, 4)
+    return round(raw ** 2.0, 4)
 
 
 def _default_code_quality(target_path: Path, work_dir: Path) -> float:
@@ -357,4 +396,5 @@ def _default_code_quality(target_path: Path, work_dir: Path) -> float:
     type_hints = _type_hint_score(target_path)
     complexity = _complexity_score(target_path)
     docs = _docstring_score(target_path)
-    return round(0.35 * lint + 0.30 * type_hints + 0.20 * complexity + 0.15 * docs, 4)
+    error_handling = _error_handling_score(target_path)
+    return round(0.30 * lint + 0.25 * type_hints + 0.15 * complexity + 0.10 * docs + 0.20 * error_handling, 4)

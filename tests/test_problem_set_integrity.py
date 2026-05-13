@@ -6,17 +6,31 @@ from runner.main import _discover_problems
 
 
 EXPECTED_PROBLEMS = {
-    "two-sum",
     "csv-stats",
-    "url-parser",
-    "lru-cache",
-    "rest-api",
-    "log-analyzer",
-    "text-editor",
-    "task-scheduler",
-    "wasm-calculator",
-    "java-reverse-string",
+    "dotnet-adsb-decoder",
+    "dotnet-crew-scheduler",
     "dotnet-fizz-buzz",
+    "dotnet-json-transform",
+    "dotnet-rate-limiter",
+    "dotnet-text-search",
+    "java-concurrent-queue",
+    "java-conflict-detector",
+    "java-expression-evaluator",
+    "java-flight-plan-parser",
+    "java-graph-shortest-path",
+    "java-http-server",
+    "java-reverse-string",
+    "log-analyzer",
+    "lru-cache",
+    "mini-db",
+    "python-runway-monitor",
+    "regex-engine",
+    "rest-api",
+    "task-scheduler",
+    "text-editor",
+    "two-sum",
+    "url-parser",
+    "wasm-calculator",
 }
 
 
@@ -41,6 +55,8 @@ def test_each_problem_has_required_files():
             "data",
             "system",
             "multi-lang",
+            "aviation",
+            "concurrency",
         }
         assert "prompt" in config and config["prompt"].strip()
         assert "scoring" in config

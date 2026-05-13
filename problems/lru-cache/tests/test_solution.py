@@ -69,3 +69,41 @@ def test_many_operations():
         assert cache.get(i) == i * 2
     assert cache.get(0) == -1
     assert cache.get(9_999) == 19_998
+
+
+def test_get_nonexistent_returns_negative_one():
+    cache = LRUCache(3)
+    assert cache.get(999) == -1
+
+
+def test_put_same_key_multiple_times():
+    cache = LRUCache(1)
+    cache.put(1, 10)
+    cache.put(1, 20)
+    cache.put(1, 30)
+    assert cache.get(1) == 30
+
+
+def test_negative_keys_and_values():
+    cache = LRUCache(2)
+    cache.put(-1, -100)
+    cache.put(-2, -200)
+    assert cache.get(-1) == -100
+    assert cache.get(-2) == -200
+
+
+def test_string_keys():
+    cache = LRUCache(2)
+    cache.put("a", 1)
+    cache.put("b", 2)
+    cache.put("c", 3)
+    assert cache.get("a") == -1
+    assert cache.get("c") == 3
+
+
+def test_large_capacity():
+    cache = LRUCache(10_000)
+    for i in range(10_000):
+        cache.put(i, i)
+    assert cache.get(0) == 0
+    assert cache.get(9_999) == 9_999

@@ -24,7 +24,7 @@ def score_correctness(generated_code: str, work_dir: str) -> float:
             total = int(m.group(1))
             failures = int(m.group(2))
             if total > 0:
-                return round(((total - failures) / total) ** 1.5, 4)
+                return round(((total - failures) / total) ** 2.0, 4)
         return 0.0
     except Exception:
         return 0.0

@@ -81,3 +81,50 @@ def test_parallel_execution_is_faster_than_serial():
     parallel_elapsed = time.perf_counter() - start
 
     assert parallel_elapsed < serial_elapsed * 0.75
+
+
+def test_duplicate_task_id_overwrites():
+    scheduler = TaskScheduler()
+    scheduler.add_task("a", lambda: "first")
+    scheduler.add_task("a", lambda: "second")
+    assert scheduler.run_all()["a"] == "second"
+
+
+def test_missing_dependency():
+    scheduler = TaskScheduler()
+    scheduler.add_task("a", lambda: "A", ["nonexistent"])
+    try:
+        scheduler.run_all()
+    except (ValueError, KeyError):
+        pass
+    else:
+        raise AssertionError("expected error for missing dependency")
+
+
+def test_many_independent_tasks():
+    scheduler = TaskScheduler(max_workers=8)
+    for i in range(20):
+        scheduler.add_task(f"t{i}", lambda x=i: x * 2)
+    result = scheduler.run_all()
+    assert len(result) == 20
+    assert result["t10"] == 20
+
+
+def test_self_dependency():
+    scheduler = TaskScheduler()
+    scheduler.add_task("a", lambda: "A", ["a"])
+    try:
+        scheduler.run_all()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("expected cycle detection for self-dependency")
+
+
+def test_task_returning_complex_type():
+    scheduler = TaskScheduler()
+    scheduler.add_task("a", lambda: [1, 2, 3])
+    scheduler.add_task("b", lambda: {"key": "val"}, ["a"])
+    result = scheduler.run_all()
+    assert result["a"] == [1, 2, 3]
+    assert result["b"] == {"key": "val"}

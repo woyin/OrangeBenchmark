@@ -1,0 +1,46 @@
+name: "regex-engine"
+difficulty: hard
+category: algorithm
+tags: [regex, nfa, parsing, automata]
+
+prompt: |
+  Implement a simplified regex engine in solution.py. Do NOT use the `re` module.
+
+  Provide a function `match(pattern: str, text: str) -> bool` that returns True if
+  the entire text matches the pattern.
+
+  Supported syntax:
+  - Literal characters: `a` matches `a`
+  - Dot `.`: matches any single character
+  - Star `*`: matches zero or more of the preceding element (greedy)
+  - Plus `+`: matches one or more of the preceding element
+  - Question `?`: matches zero or one of the preceding element
+  - Character classes `[abc]`: matches any one character in the set
+  - Negated classes `[^abc]`: matches any character NOT in the set
+  - Ranges `[a-z]`: matches any character in the ASCII range
+  - Escape `\`: treats the next character as literal (including `\.` `\*` `\+` `\?` `\[` `\]` `\\`)
+  - Start anchor `^`: if pattern starts with `^`, text must start with the remaining pattern
+  - End anchor `$`: if pattern ends with `$`, text must end with the preceding pattern
+
+  The match must cover the ENTIRE input string (not just a substring), unless anchors
+  are used to specify partial matching.
+
+  Examples:
+  - match("a.b", "axb") -> True
+  - match("a*b", "aaab") -> True
+  - match("a+b", "b") -> False
+  - match("[abc]", "b") -> True
+  - match("[^abc]", "d") -> True
+  - match("a?b", "b") -> True
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

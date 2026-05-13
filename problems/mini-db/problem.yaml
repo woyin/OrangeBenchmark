@@ -1,0 +1,54 @@
+name: "mini-db"
+difficulty: hard
+category: system
+tags: [database, transaction, mvcc, isolation]
+
+prompt: |
+  Implement MiniDB in solution.py — an in-memory key-value store with transaction support.
+
+  class MiniDB:
+      def get(self, key: str) -> str | None
+          Return the value for key, or None if not found.
+
+      def set(self, key: str, value: str) -> None
+          Set key to value.
+
+      def delete(self, key: str) -> bool
+          Delete key. Return True if key existed, False otherwise.
+
+      def begin(self) -> None
+          Start a new transaction (nested transactions are supported).
+
+      def commit(self) -> None
+          Commit the current transaction, merging its changes into the parent.
+          Raise RuntimeError if no transaction is active.
+
+      def rollback(self) -> None
+          Discard all changes in the current transaction.
+          Raise RuntimeError if no transaction is active.
+
+      def scan(self, prefix: str) -> list[tuple[str, str]]
+          Return all key-value pairs where the key starts with prefix, sorted by key.
+
+      def count(self, prefix: str) -> int
+          Return count of keys starting with prefix.
+
+  Transaction rules:
+  - Nested transactions are supported (begin inside begin).
+  - Each transaction sees its own writes + all committed parent state.
+  - Commit merges current transaction into parent.
+  - Rollback discards current transaction entirely.
+  - get/set/delete inside a transaction only affect the transaction's view until commit.
+  - Operations outside a transaction are auto-committed immediately.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30
