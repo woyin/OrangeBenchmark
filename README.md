@@ -29,29 +29,15 @@ uv run orangebench ranking
 ```
 OrangeBenchmark/
 ├── AGENT_INSTRUCTIONS.md    # 给 Coding Agent 的任务说明
-├── problems/                # 评测题目
-│   ├── two-sum/             # easy, algorithm, Python
-│   ├── csv-stats/           # easy, data, Python
-│   ├── url-parser/          # easy, string, Python
-│   ├── lru-cache/           # medium, algorithm, Python
-│   ├── rest-api/            # medium, api, Python
-│   ├── log-analyzer/        # medium, data, Python
-│   ├── text-editor/         # hard, algorithm, Python
-│   ├── task-scheduler/      # hard, system, Python
-│   ├── python-runway-monitor/ # medium, aviation, Python
-│   ├── java-reverse-string/   # easy, string, Java
-│   ├── java-flight-plan-parser/ # medium, aviation, Java
-│   ├── java-conflict-detector/  # hard, aviation, Java
-│   ├── java-expression-evaluator/ # medium, algorithm, Java
-│   ├── java-concurrent-queue/    # hard, concurrency, Java
-│   ├── java-graph-shortest-path/ # medium, algorithm, Java
-│   ├── dotnet-fizz-buzz/      # easy, algorithm, .NET/C#
-│   ├── dotnet-adsb-decoder/   # hard, aviation, .NET/C#
-│   ├── dotnet-crew-scheduler/ # hard, aviation, .NET/C#
-│   ├── dotnet-json-transform/ # medium, data, .NET/C#
-│   ├── dotnet-rate-limiter/   # hard, concurrency, .NET/C#
-│   ├── dotnet-text-search/    # medium, algorithm, .NET/C#
-│   └── wasm-calculator/       # hard, multi-lang, Rust/Wasm
+├── problems/                # 评测题目（52 道，6 种语言）
+│   ├── _template/           # 新题目脚手架
+│   ├── _examples/           # 题目结构参考示例
+│   ├── two-sum/             # Python 题目
+│   ├── java-reverse-string/ # Java 题目
+│   ├── react-counter-app/   # React 题目
+│   ├── bash-file-renamer/   # Bash 题目
+│   ├── dotnet-fizz-buzz/    # .NET/C# 题目
+│   └── wasm-calculator/     # Rust/Wasm 题目
 ├── runner/                  # 评分引擎
 ├── results/                 # 历史评测结果 (JSON)
 └── tests/                   # 测试
@@ -97,49 +83,89 @@ uv run orangebench ranking --category algorithm
 uv run orangebench show --model "gpt-4o"
 ```
 
-## 题目列表
+## 题目列表（52 道，6 种语言）
 
-### Python
+### Python（16 道）
 
-| # | 题目 | 难度 | 类别 | 评分维度 |
-|---|------|------|------|---------|
-| 1 | two-sum | easy | algorithm | correctness, code_quality |
-| 2 | csv-stats | easy | data | correctness, code_quality |
-| 3 | url-parser | easy | string | correctness, code_quality |
-| 4 | lru-cache | medium | algorithm | correctness, code_quality, performance |
-| 5 | rest-api | medium | api | correctness, code_quality |
-| 6 | log-analyzer | medium | data | correctness, code_quality, performance |
-| 7 | text-editor | hard | algorithm | correctness, code_quality, performance |
-| 8 | task-scheduler | hard | system | correctness, code_quality, performance |
-| 9 | python-runway-monitor | medium | aviation | correctness, code_quality, performance |
+| # | 题目 | 难度 | 类别 |
+|---|------|------|------|
+| 1 | two-sum | easy | algorithm |
+| 2 | csv-stats | easy | data |
+| 3 | url-parser | easy | string |
+| 4 | lru-cache | medium | algorithm |
+| 5 | rest-api | medium | api |
+| 6 | log-analyzer | medium | data |
+| 7 | text-editor | hard | algorithm |
+| 8 | task-scheduler | hard | system |
+| 9 | python-runway-monitor | medium | aviation |
+| 10 | regex-engine | hard | algorithm |
+| 11 | mini-db | hard | system |
+| 12 | python-jwt-decoder | medium | security |
+| 13 | python-metar-parser | medium | aviation |
+| 14 | python-route-planner | hard | aviation |
+| 15 | python-word-ladder | hard | algorithm |
+| 16 | python-markdown-parser | medium | parsing |
 
-### Java
+### Java（17 道）
 
-| # | 题目 | 难度 | 类别 | 评分维度 |
-|---|------|------|------|---------|
-| 10 | java-reverse-string | easy | string | correctness, code_quality |
-| 11 | java-flight-plan-parser | medium | aviation | correctness, code_quality |
-| 12 | java-conflict-detector | hard | aviation | correctness, code_quality, performance |
-| 13 | java-expression-evaluator | medium | algorithm | correctness, code_quality |
-| 14 | java-concurrent-queue | hard | concurrency | correctness, code_quality, performance |
-| 15 | java-graph-shortest-path | medium | algorithm | correctness, code_quality |
+| # | 题目 | 难度 | 类别 |
+|---|------|------|------|
+| 17 | java-reverse-string | easy | string |
+| 18 | java-flight-plan-parser | medium | aviation |
+| 19 | java-conflict-detector | hard | aviation |
+| 20 | java-expression-evaluator | medium | algorithm |
+| 21 | java-concurrent-queue | hard | concurrency |
+| 22 | java-graph-shortest-path | medium | algorithm |
+| 23 | java-http-server | hard | system |
+| 24 | java-fizz-buzz | easy | algorithm |
+| 25 | java-palindrome-checker | easy | string |
+| 26 | java-json-parser | medium | parsing |
+| 27 | java-sorting-library | medium | algorithm |
+| 28 | java-thread-pool | hard | concurrency |
+| 29 | java-matrix-ops | medium | math |
+| 30 | java-aircraft-scheduler | hard | aviation |
+| 31 | java-password-validator | easy | security |
+| 32 | java-morse-code | easy | encoding |
+| 33 | java-tcp-chat-server | hard | system |
 
-### .NET / C#
+### React（7 道）
 
-| # | 题目 | 难度 | 类别 | 评分维度 |
-|---|------|------|------|---------|
-| 16 | dotnet-fizz-buzz | easy | algorithm | correctness, code_quality |
-| 17 | dotnet-adsb-decoder | hard | aviation | correctness, code_quality, performance |
-| 18 | dotnet-crew-scheduler | hard | aviation | correctness, code_quality, performance |
-| 19 | dotnet-json-transform | medium | data | correctness, code_quality |
-| 20 | dotnet-rate-limiter | hard | concurrency | correctness, code_quality, performance |
-| 21 | dotnet-text-search | medium | algorithm | correctness, code_quality |
+| # | 题目 | 难度 | 类别 |
+|---|------|------|------|
+| 34 | react-counter-app | easy | frontend |
+| 35 | react-todo-list | easy | frontend |
+| 36 | react-color-picker | medium | frontend |
+| 37 | react-data-table | medium | frontend |
+| 38 | react-form-validator | medium | frontend |
+| 39 | react-drag-kanban | hard | frontend |
+| 40 | react-infinite-scroll | hard | frontend |
 
-### Rust
+### Bash（5 道）
 
-| # | 题目 | 难度 | 类别 | 评分维度 |
-|---|------|------|------|---------|
-| 22 | wasm-calculator | hard | multi-lang | correctness, code_quality, performance |
+| # | 题目 | 难度 | 类别 |
+|---|------|------|------|
+| 41 | bash-file-renamer | easy | system |
+| 42 | bash-log-summary | easy | data |
+| 43 | bash-csv-merger | medium | data |
+| 44 | bash-process-monitor | medium | system |
+| 45 | bash-backup-rotation | hard | system |
+
+### .NET / C#（6 道）
+
+| # | 题目 | 难度 | 类别 |
+|---|------|------|------|
+| 46 | dotnet-fizz-buzz | easy | algorithm |
+| 47 | dotnet-adsb-decoder | hard | aviation |
+| 48 | dotnet-crew-scheduler | hard | aviation |
+| 49 | dotnet-json-transform | medium | data |
+| 50 | dotnet-rate-limiter | hard | concurrency |
+| 51 | dotnet-text-search | medium | algorithm |
+
+### Rust（1 道）
+
+| # | 题目 | 难度 | 类别 |
+|---|------|------|------|
+| 52 | wasm-calculator | hard | multi-lang |
 
 ## 评分维度
 
@@ -160,7 +186,7 @@ uv run orangebench show --model "gpt-4o"
 
 - Python >= 3.11
 - [uv](https://github.com/astral-sh/uv) 包管理器
-- 可选：`cargo`（Rust 题目）、`mvn`（Java 题目）、`dotnet`（.NET 题目）
+- 可选：`mvn`（Java 题目）、`dotnet`（.NET 题目）、`cargo`（Rust 题目）、`npm`（React 题目）、`bash`（Bash 题目）
 
 ## License
 
