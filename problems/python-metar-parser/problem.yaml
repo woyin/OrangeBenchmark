@@ -1,0 +1,37 @@
+name: "python-metar-parser"
+difficulty: medium
+category: aviation
+tags: [metar, aviation, parsing, weather]
+
+prompt: |
+  Parse METAR aviation weather reports. Standard library only.
+
+  Implement `parse_metar(raw: str) -> dict` in solution.py.
+
+  Return dict with keys:
+  - station: str (ICAO code, first 4 chars)
+  - auto: bool (True if "AUTO" present)
+  - time: dict with day(int), hour(int), minute(int) from DDHHMMZ group
+  - wind: dict with direction(int or "VRB"), speed(int), gust(int or None), unit("KT")
+  - visibility: str or int (e.g. "9999" → 9999, "1/2SM" → "1/2SM")
+  - clouds: list of dicts with sky_cover(str), altitude(int or None) — e.g. FEW060 → {"sky_cover": "FEW", "altitude": 60}
+  - temperature: int (before the /)
+  - dewpoint: int (after the /)
+  - altimeter: float (inches, e.g. A3012 → 30.12)
+  - remarks: str (everything after "RMK", or empty string)
+
+  Example: "KJFK 121851Z 27010G15KT 10SM FEW060 SCT100 22/12 A3012 RMK AO2"
+
+  Handle missing fields gracefully (return None for missing wind/visibility/etc).
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

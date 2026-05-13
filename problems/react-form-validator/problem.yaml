@@ -1,0 +1,28 @@
+name: "react-form-validator"
+difficulty: medium
+category: frontend
+tags: [react, form, validation]
+
+prompt: |
+  Implement a FormValidator component in src/FormValidator.tsx.
+  Features:
+  - Renders form fields based on config prop
+  - Field config: `{ name: string, label: string, type: string, required?: boolean, minLength?: number, pattern?: string, validate?: (value: string) => string | null }`
+  - Show error messages below each field on blur if validation fails
+  - Submit button disabled until all validations pass
+  - onSubmit callback receives form values as Record<string, string>
+
+  Export: `export default FormValidator`
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/FormValidator.tsx"
+copy_paths: ["package.json", "tsconfig.json", "vite.config.ts", "src/test-setup.ts", "src/main.tsx"]
+timeout: 60

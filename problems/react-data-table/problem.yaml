@@ -1,0 +1,28 @@
+name: "react-data-table"
+difficulty: medium
+category: frontend
+tags: [react, table, sorting, filtering]
+
+prompt: |
+  Implement a DataTable component in src/DataTable.tsx.
+  Props: `columns: {key:string, label:string, sortable?:boolean}[]`, `data: Record<string,any>[]`, `pageSize?: number (default 10)`
+  Features:
+  - Render table with headers and rows
+  - Click sortable column header to sort (asc/desc toggle)
+  - Text input above table to filter rows (searches all columns)
+  - Pagination: prev/next buttons, show "Page X of Y"
+
+  Export: `export default DataTable`
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/DataTable.tsx"
+copy_paths: ["package.json", "tsconfig.json", "vite.config.ts", "src/test-setup.ts", "src/main.tsx"]
+timeout: 60

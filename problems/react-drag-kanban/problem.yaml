@@ -1,0 +1,28 @@
+name: "react-drag-kanban"
+difficulty: hard
+category: frontend
+tags: [react, drag-drop, kanban, state]
+
+prompt: |
+  Implement a KanbanBoard component in src/KanbanBoard.tsx.
+  Features:
+  - Three columns: "To Do", "In Progress", "Done"
+  - Each card has title and can be dragged between columns
+  - Use HTML5 Drag and Drop API
+  - Initial data: `columns: { "To Do": [{id, title}], "In Progress": [], "Done": [] }`
+  - Dragging a card moves it from source column to target column
+
+  Export: `export default KanbanBoard`
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/KanbanBoard.tsx"
+copy_paths: ["package.json", "tsconfig.json", "vite.config.ts", "src/test-setup.ts", "src/main.tsx"]
+timeout: 60

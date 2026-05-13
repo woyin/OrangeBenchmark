@@ -1,0 +1,33 @@
+name: "python-jwt-decoder"
+difficulty: medium
+category: security
+tags: [jwt, security, hmac, base64]
+
+prompt: |
+  Implement JWT decoding and HS256 verification using ONLY the standard library
+  (hashlib, hmac, base64, json). Do NOT use PyJWT, cryptography, or any third-party package.
+
+  Implement in solution.py:
+
+  - `decode(token: str) -> dict`: Decode and return the payload without verification.
+  - `verify(token: str, secret: str) -> dict`: Verify HS256 signature and check expiry.
+    Raise ValueError if signature is invalid or token is expired.
+  - `create_token(payload: dict, secret: str, exp_seconds: int = 3600) -> str`:
+    Create a signed JWT with auto-generated "iat" and "exp" claims.
+
+  JWT format: base64url(header).base64url(payload).base64url(signature)
+  HS256 signs the "header.payload" string with HMAC-SHA256.
+  base64url uses URL-safe alphabet with no padding.
+  Expiry check: payload["exp"] > current Unix timestamp.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

@@ -1,0 +1,27 @@
+name: "bash-process-monitor"
+difficulty: medium
+category: system
+tags: [bash, process, monitoring, system]
+
+prompt: |
+  Implement a process monitoring script in solution.sh.
+  Usage: `./solution.sh [--cpu threshold] [--mem threshold] [--interval seconds] [--count N]`
+  Default: --cpu 80 --mem 80 --interval 5 --count 1
+  Each iteration:
+  - Print: "Timestamp: <ISO8601>"
+  - Print: "CPU: <usage>% | Memory: <usage>%"
+  - If CPU or memory exceeds threshold, print: "ALERT: <resource> exceeded <threshold>%"
+  - Print top 5 processes by CPU: "Top CPU: <pid> <name> <cpu%>"
+  Exit 0 after all iterations.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.sh"
+timeout: 30

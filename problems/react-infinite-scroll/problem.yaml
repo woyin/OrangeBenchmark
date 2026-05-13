@@ -1,0 +1,34 @@
+name: "react-infinite-scroll"
+difficulty: hard
+category: frontend
+tags: [react, infinite-scroll, virtualization, intersection-observer]
+
+prompt: |
+  Implement an InfiniteScroll component in src/InfiniteScroll.tsx.
+  Props:
+  - `fetchData: (page: number) => Promise<{ items: any[], hasMore: boolean }>`
+  - `renderItem: (item: any, index: number) => ReactNode`
+  - `loadingFallback?: ReactNode`
+  - `threshold?: number` (pixels from bottom to trigger fetch, default 200)
+
+  Features:
+  - Load first page on mount
+  - Load next page when user scrolls near bottom
+  - Show loading indicator while fetching
+  - Stop loading when hasMore is false
+  - Track current page number
+
+  Export: `export default InfiniteScroll`
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/InfiniteScroll.tsx"
+copy_paths: ["package.json", "tsconfig.json", "vite.config.ts", "src/test-setup.ts", "src/main.tsx"]
+timeout: 60

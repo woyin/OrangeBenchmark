@@ -1,0 +1,30 @@
+name: "bash-log-summary"
+difficulty: easy
+category: data
+tags: [bash, logs, analysis, awk]
+
+prompt: |
+  Implement a log analysis script in solution.sh.
+  Usage: `./solution.sh <logfile>`
+  Output:
+  - Line: "Total requests: <N>"
+  - Line: "Top IPs: <ip1> (<count>), <ip2> (<count>)" (top 5)
+  - Line: "Status codes: <code1>=<count1>, <code2>=<count2>" (sorted by count desc)
+  - Line: "Avg response time: <seconds>s"
+
+  Assume Apache/NCSA combined log format:
+  `IP - - [date] "METHOD PATH HTTP/1.1" STATUS SIZE "referer" "UA" RESPONSE_TIME`
+
+  Exit 0 on success, 1 on error (missing file, etc).
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.sh"
+timeout: 30

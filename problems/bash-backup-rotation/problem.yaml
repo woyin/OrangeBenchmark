@@ -1,0 +1,30 @@
+name: "bash-backup-rotation"
+difficulty: hard
+category: system
+tags: [bash, backup, rotation, system]
+
+prompt: |
+  Implement a backup rotation script in solution.sh.
+  Usage: `./solution.sh --source <dir> --backup-dir <dir> --retain-daily 7 --retain-weekly 4 --retain-monthly 3`
+  Behavior:
+  - Create a tar.gz backup of source directory named backup-YYYYMMDD-HHMMSS.tar.gz
+  - Apply retention policy:
+    - Keep last N daily backups (any backup created today counts)
+    - Keep last N weekly backups (Sunday backups or first backup of each week)
+    - Keep last N monthly backups (1st of month or first backup of each month)
+  - Delete backups that don't match any retention rule
+  - Print: "Created: <filename>" and "Deleted: <filename>" for each action
+
+  Exit 0 on success, 1 on error.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.sh"
+timeout: 30

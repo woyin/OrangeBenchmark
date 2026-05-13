@@ -1,0 +1,23 @@
+name: "java-fizz-buzz"
+difficulty: easy
+category: algorithm
+tags: [java, algorithm, fizzbuzz]
+
+prompt: |
+  Implement a FizzBuzz class in src/main/java/FizzBuzz.java.
+  Provide a static method `generate(int n) -> List<String>` that returns a list
+  of strings from 1 to n. Multiples of 3 → "Fizz", 5 → "Buzz", both → "FizzBuzz".
+  Otherwise the number as string. Return empty list for n <= 0.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/FizzBuzz.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

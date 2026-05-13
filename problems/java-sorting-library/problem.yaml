@@ -1,0 +1,25 @@
+name: "java-sorting-library"
+difficulty: medium
+category: algorithm
+tags: [java, algorithm, sorting, generics]
+
+prompt: |
+  Implement a SortingLibrary class in src/main/java/SortingLibrary.java.
+  Static generic methods:
+  - `<T extends Comparable<T>> List<T> quickSort(List<T> items)`
+  - `<T extends Comparable<T>> List<T> mergeSort(List<T> items)`
+  - `<T extends Comparable<T>> List<T> heapSort(List<T> items)`
+  All return new sorted list, do not modify input. Handle empty and single-element lists.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/SortingLibrary.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

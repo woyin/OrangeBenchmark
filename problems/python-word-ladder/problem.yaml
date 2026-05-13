@@ -1,0 +1,27 @@
+name: "python-word-ladder"
+difficulty: hard
+category: algorithm
+tags: [bfs, graph, word-ladder, algorithm]
+
+prompt: |
+  Implement BFS word ladder in solution.py.
+
+  Function: `word_ladder(start: str, target: str, dictionary: list[str]) -> list[str]`
+
+  Find shortest transformation from start to target, changing one letter at a time.
+  Each intermediate word must exist in the dictionary. Case-insensitive comparison.
+  All words are the same length. Return words in original case from dictionary.
+  Return empty list if no path exists. Start and target are included in the result.
+  If start equals target (case-insensitive), return [start].
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

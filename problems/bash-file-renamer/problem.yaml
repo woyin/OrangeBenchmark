@@ -1,0 +1,27 @@
+name: "bash-file-renamer"
+difficulty: easy
+category: system
+tags: [bash, files, rename, scripting]
+
+prompt: |
+  Implement a batch file rename script in solution.sh.
+  Usage: `./solution.sh <directory> <pattern> <replacement>`
+  For each file in the directory matching <pattern> (glob), replace the pattern
+  text in the filename with <replacement>. Also support:
+  - `--number`: append sequential number (001, 002, ...) before extension
+  - `--lower`: convert filename to lowercase
+  - `--dry-run`: print what would be renamed without actually renaming
+
+  Exit 0 on success, 1 on error. Print each rename as "old_name -> new_name".
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.sh"
+timeout: 30

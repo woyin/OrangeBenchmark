@@ -1,0 +1,33 @@
+name: "python-route-planner"
+difficulty: hard
+category: aviation
+tags: [aviation, dijkstra, great-circle, route]
+
+prompt: |
+  Implement an aviation route planner using great-circle distance.
+
+  In solution.py, define:
+
+  - `Waypoint(name: str, lat: float, lon: float)`: dataclass or named tuple
+  - `RoutePlanner` class with methods:
+    - `add_waypoint(waypoint: Waypoint) -> None`
+    - `add_airway(wp1_name: str, wp2_name: str, name: str = "") -> None`: bidirectional connection
+    - `find_shortest_route(from_name: str, to_name: str) -> tuple[list[str], float]`:
+      Dijkstra shortest path, return (waypoint_names, total_distance_nm)
+    - `distance_between(name1: str, name2: str) -> float`: great-circle distance in nautical miles
+
+  Haversine formula, Earth radius = 3440.065 NM.
+  Raise ValueError for unknown waypoint names.
+  If no route exists, return ([], float('inf')).
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

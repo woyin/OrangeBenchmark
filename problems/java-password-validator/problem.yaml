@@ -1,0 +1,28 @@
+name: "java-password-validator"
+difficulty: easy
+category: security
+tags: [java, security, validation]
+
+prompt: |
+  Implement PasswordValidator in src/main/java/PasswordValidator.java.
+  Constructor: `PasswordValidator(int minLength, boolean requireUpper, boolean requireLower, boolean requireDigit, boolean requireSpecial)`
+  Methods:
+  - `boolean validate(String password)` — check all enabled rules
+  - `int getStrength(String password)` — return 0-4 score
+    0: fails minLength, 1: meets minLength only, 2-4: +1 per additional rule met
+  - `List<String> getFailures(String password)` — list descriptions of failed rules
+  Special chars: !@#$%^&*()_+-=[]{}|;:',.<>?/
+  Null password returns false, strength 0, failures includes "null password".
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/PasswordValidator.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

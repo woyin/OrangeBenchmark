@@ -1,0 +1,28 @@
+name: "react-color-picker"
+difficulty: medium
+category: frontend
+tags: [react, color, hsl, controlled]
+
+prompt: |
+  Implement a ColorPicker component in src/ColorPicker.tsx.
+  Features:
+  - Three sliders for H (0-360), S (0-100), L (0-100)
+  - Display color preview swatch
+  - Display current HSL values as text
+  - Display hex color code
+  - Props: initialHue=0, initialSaturation=100, initialLightness=50
+
+  Export: `export default ColorPicker`
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/ColorPicker.tsx"
+copy_paths: ["package.json", "tsconfig.json", "vite.config.ts", "src/test-setup.ts", "src/main.tsx"]
+timeout: 60

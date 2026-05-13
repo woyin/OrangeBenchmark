@@ -1,0 +1,27 @@
+name: "java-json-parser"
+difficulty: medium
+category: parsing
+tags: [java, parsing, json, recursive-descent]
+
+prompt: |
+  Implement a JsonParser in src/main/java/JsonParser.java. No external libraries.
+  Methods:
+  - `static Object parse(String json)` — returns Map, List, String, Number, Boolean, or null
+  - `static String getString(Object result, String path)` — dot-separated path, e.g. "user.name"
+  - `static Double getNumber(Object result, String path)`
+  - `static Boolean getBoolean(Object result, String path)`
+  Recursive descent parser. Support objects {}, arrays [], strings with escapes, numbers, true/false, null.
+  Throw IllegalArgumentException on malformed JSON.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/JsonParser.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

@@ -1,0 +1,35 @@
+name: "python-markdown-parser"
+difficulty: medium
+category: parsing
+tags: [markdown, html, parsing]
+
+prompt: |
+  Convert simplified Markdown to HTML in solution.py. Standard library only (use re).
+
+  Function: `markdown_to_html(md: str) -> str`
+
+  Support:
+  - Headers: # H1, ## H2, ### H3 → <h1>...</h1>, <h2>...</h2>, <h3>...</h3>
+  - Bold: **text** → <strong>text</strong>
+  - Italic: *text* → <em>text</em> (not inside **)
+  - Links: [text](url) → <a href="url">text</a>
+  - Unordered lists: lines starting with "- " → <ul><li>...</li></ul>
+  - Ordered lists: lines starting with "1. " → <ol><li>...</li></ol>
+  - Code blocks: ``` on its own line → <pre><code>content</code></pre>
+  - Inline code: `code` → <code>code</code>
+  - Paragraphs: text separated by blank lines → <p>...</p>
+  - Plain text not matching other rules wraps in <p> tags
+
+  Process inline formatting (bold, italic, links, code) within block elements.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.py"
+timeout: 30

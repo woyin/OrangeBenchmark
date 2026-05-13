@@ -1,0 +1,31 @@
+name: "java-aircraft-scheduler"
+difficulty: hard
+category: aviation
+tags: [java, aviation, scheduling, constraint-satisfaction]
+
+prompt: |
+  Implement aircraft gate scheduler in src/main/java/.
+  Classes:
+  - Flight(String flightId, String aircraftType, int arrivalTime, int departureTime, int passengers)
+  - Gate(String gateId, int capacity)
+  - Assignment(String flightId, String gateId)
+  - AircraftScheduler:
+    - `void addGate(Gate gate)`
+    - `void addFlight(Flight flight)`
+    - `List<Assignment> schedule()` — greedy assign flights to gates
+      Rules: no two flights on same gate with overlapping [arrival, departure) time windows.
+      Flights with more passengers get priority. Return sorted by flightId.
+      Flights that can't be assigned are excluded.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/AircraftScheduler.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

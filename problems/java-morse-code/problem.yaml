@@ -1,0 +1,25 @@
+name: "java-morse-code"
+difficulty: easy
+category: encoding
+tags: [java, encoding, morse]
+
+prompt: |
+  Implement a MorseCode class in src/main/java/MorseCode.java.
+  Static methods:
+  - `String encode(String text)` — text to morse, letters separated by space, words by " / "
+  - `String decode(String morse)` — morse to text
+  Support A-Z, 0-9. Unknown chars skipped. Case-insensitive input.
+  Standard ITU morse code mapping.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/MorseCode.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

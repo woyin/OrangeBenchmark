@@ -1,0 +1,28 @@
+name: "java-tcp-chat-server"
+difficulty: hard
+category: system
+tags: [java, nio, tcp, networking, concurrency]
+
+prompt: |
+  Implement a TCP chat server in src/main/java/ using Java NIO or regular sockets.
+  ChatServer:
+  - `ChatServer(int port)` — create server
+  - `void start()` — start in background thread
+  - `void stop()` — stop server and disconnect all
+  - `int getConnectedClientCount()`
+
+  Behavior: when a client sends a message, broadcast to all OTHER clients as "Client<N>: <message>".
+  First client = Client1, second = Client2, etc. Client joins get a welcome "Welcome Client<N>!".
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/ChatServer.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 60

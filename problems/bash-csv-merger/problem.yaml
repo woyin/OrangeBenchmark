@@ -1,0 +1,28 @@
+name: "bash-csv-merger"
+difficulty: medium
+category: data
+tags: [bash, csv, data-processing]
+
+prompt: |
+  Implement a CSV merge script in solution.sh.
+  Usage: `./solution.sh <output.csv> <input1.csv> [input2.csv ...]`
+  Behavior:
+  - Merge all input CSVs into output.csv
+  - Use header from first file, skip headers in subsequent files
+  - Remove duplicate rows (exact match)
+  - Sort output by first column
+  - Handle quoted fields with commas inside
+
+  Exit 0 on success, 1 on error.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "solution.sh"
+timeout: 30

@@ -1,0 +1,27 @@
+name: "java-matrix-ops"
+difficulty: medium
+category: math
+tags: [java, math, matrix, linear-algebra]
+
+prompt: |
+  Implement a Matrix class in src/main/java/Matrix.java.
+  Constructor: `Matrix(double[][] data)`
+  Methods:
+  - `Matrix multiply(Matrix other)` — matrix multiplication
+  - `Matrix transpose()` — transpose
+  - `double determinant()` — for square matrices (recursive for NxN)
+  - `int getRows()`, `int getCols()`, `double get(int row, int col)`
+  Throw IllegalArgumentException for dimension mismatches in multiply.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/Matrix.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 30

@@ -1,0 +1,27 @@
+name: "java-thread-pool"
+difficulty: hard
+category: concurrency
+tags: [java, concurrency, thread-pool, executor]
+
+prompt: |
+  Implement SimpleThreadPool in src/main/java/SimpleThreadPool.java.
+  Constructor: `SimpleThreadPool(int poolSize)`
+  Methods:
+  - `<T> Future<T> submit(Callable<T> task)` — submit task for execution
+  - `void shutdown()` — reject new tasks, wait for running ones
+  - `void awaitTermination(long timeout, TimeUnit unit)` — wait up to timeout
+  Use BlockingQueue for task queue. After shutdown, submit throws RejectedExecutionException.
+  Workers are daemon threads. Exceptions in tasks are captured in Future.get().
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/main/java/SimpleThreadPool.java"
+copy_paths: ["pom.xml", "src"]
+timeout: 60

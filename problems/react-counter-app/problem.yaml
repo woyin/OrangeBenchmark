@@ -1,0 +1,28 @@
+name: "react-counter-app"
+difficulty: easy
+category: frontend
+tags: [react, state, counter]
+
+prompt: |
+  Implement a Counter component in src/Counter.tsx.
+  Requirements:
+  - Display current count (default 0)
+  - "+" button increments count
+  - "-" button decrements count
+  - "Reset" button resets to 0
+  - Count must not go below 0
+
+  Export: `export default Counter`
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+
+target_file: "src/Counter.tsx"
+copy_paths: ["package.json", "tsconfig.json", "vite.config.ts", "src/test-setup.ts", "src/main.tsx"]
+timeout: 60
