@@ -1,0 +1,24 @@
+name: "dotnet-palindrome-checker"
+difficulty: easy
+category: string
+tags: [dotnet, csharp, string, palindrome]
+
+prompt: |
+  Implement a PalindromeChecker class in PalindromeChecker.cs.
+  Provide a static method `IsPalindrome(string text) -> bool` that returns true
+  if the text is a palindrome (reads the same forwards and backwards), ignoring
+  case, spaces, and punctuation. Return true for empty or null strings.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+  correctness_exponent: 4
+
+target_file: "PalindromeChecker.cs"
+copy_paths: ["dotnet-palindrome-checker.csproj"]
+timeout: 30

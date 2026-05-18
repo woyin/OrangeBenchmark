@@ -39,6 +39,7 @@ scoring:
       weight: 0.3
     - name: performance
       weight: 0.3
+  correctness_exponent: 4
 
 target_file: "src/main/java/FlightPlanParser.java"
 copy_paths: ["pom.xml", "src"]

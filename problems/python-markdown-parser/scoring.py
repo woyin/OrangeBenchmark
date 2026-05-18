@@ -24,7 +24,6 @@ def hello():
 End paragraph.
 """
 
-
 def score_performance(generated_code: str, work_dir: str) -> float:
     spec = importlib.util.spec_from_file_location(
         "markdown_generated",

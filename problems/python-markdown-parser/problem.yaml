@@ -25,11 +25,15 @@ prompt: |
 scoring:
   dimensions:
     - name: correctness
-      weight: 0.4
+      weight: 0.45
     - name: code_quality
-      weight: 0.3
+      weight: 0.35
     - name: performance
-      weight: 0.3
+      weight: 0.20
+  performance:
+    fast_seconds: 1.0
+    slow_seconds: 15.0
+  correctness_exponent: 4
 
 target_file: "solution.py"
 timeout: 30

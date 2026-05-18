@@ -1,0 +1,30 @@
+name: "rust-string-manipulation"
+difficulty: medium
+category: string
+tags: [rust, string, manipulation, parsing]
+
+prompt: |
+  Implement a string manipulation library in src/lib.rs.
+  Provide these public functions:
+
+  1. `capitalize_first(s: &str) -> String` - Capitalize the first character
+  2. `title_case(s: &str) -> String` - Capitalize first letter of each word
+  3. `count_words(s: &str) -> usize` - Count words (separated by whitespace)
+  4. `reverse_words(s: &str) -> String` - Reverse order of words
+  5. `is_pangram(s: &str) -> bool` - Check if string contains all 26 letters
+
+  All functions should handle empty strings gracefully.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.5
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.2
+  correctness_exponent: 4
+
+target_file: "src/lib.rs"
+copy_paths: ["Cargo.toml", "src", "tests"]
+timeout: 60

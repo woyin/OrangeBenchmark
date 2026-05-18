@@ -14,11 +14,19 @@ prompt: |
 scoring:
   dimensions:
     - name: correctness
-      weight: 0.4
+      weight: 0.30
     - name: code_quality
-      weight: 0.3
+      weight: 0.25
     - name: performance
-      weight: 0.3
+      weight: 0.15
+    - name: security
+      weight: 0.20
+    - name: robustness
+      weight: 0.10
+  performance:
+    fast_seconds: 0.5
+    slow_seconds: 5.0
+  correctness_exponent: 4
 
 target_file: "solution.py"
 timeout: 30

@@ -2,7 +2,6 @@ import importlib.util
 import time
 from pathlib import Path
 
-
 def score_performance(generated_code: str, work_dir: str) -> float:
     spec = importlib.util.spec_from_file_location(
         "url_parser_generated",

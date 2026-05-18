@@ -1,0 +1,25 @@
+name: "rust-fizz-buzz"
+difficulty: easy
+category: algorithm
+tags: [rust, algorithm, fizzbuzz]
+
+prompt: |
+  Implement a FizzBuzz library in src/lib.rs.
+  Provide a public function `fizzbuzz(n: u32) -> Vec<String>` that returns a
+  vector of strings from 1 to n. Multiples of 3 use "Fizz", multiples of 5
+  use "Buzz", multiples of both use "FizzBuzz". Otherwise use the number
+  as string. Return empty vector for n == 0.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.5
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.2
+  correctness_exponent: 4
+
+target_file: "src/lib.rs"
+copy_paths: ["Cargo.toml", "src", "tests"]
+timeout: 60

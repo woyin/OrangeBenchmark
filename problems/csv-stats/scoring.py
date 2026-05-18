@@ -4,7 +4,6 @@ import tempfile
 import time
 from pathlib import Path
 
-
 def score_performance(generated_code: str, work_dir: str) -> float:
     spec = importlib.util.spec_from_file_location(
         "csv_stats_generated",

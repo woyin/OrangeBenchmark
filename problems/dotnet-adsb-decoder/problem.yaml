@@ -34,6 +34,7 @@ scoring:
       weight: 0.3
     - name: performance
       weight: 0.3
+  correctness_exponent: 4
 
 target_file: "AdsbDecoder.cs"
 copy_paths: ["dotnet-adsb-decoder.csproj", "AdsbDecoderTest.cs"]

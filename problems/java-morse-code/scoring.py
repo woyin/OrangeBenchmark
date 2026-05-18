@@ -20,12 +20,5 @@ def score_correctness(generated_code, work_dir):
         return 0.0
     except: return 0.0
 
-def score_code_quality(generated_code, work_dir):
-    if shutil.which("mvn") is None: return 0.0
-    try:
-        result = _run(["mvn", "compile", "-q"], work_dir)
-        return 1.0 if result.returncode == 0 else 0.5
-    except: return 0.0
-
 def score_performance(generated_code, work_dir):
     return 0.7

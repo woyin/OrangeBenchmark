@@ -22,6 +22,7 @@ scoring:
       weight: 0.3
     - name: performance
       weight: 0.3
+  correctness_exponent: 4
 
 target_file: "src/DataTable.tsx"
 copy_paths: ["package.json", "tsconfig.json", "vite.config.ts", "src/test-setup.ts", "src/main.tsx"]

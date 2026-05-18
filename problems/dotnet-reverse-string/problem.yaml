@@ -1,0 +1,23 @@
+name: "dotnet-reverse-string"
+difficulty: easy
+category: string
+tags: [dotnet, csharp, string, reverse]
+
+prompt: |
+  Implement a StringReverser class in StringReverser.cs.
+  Provide a static method `Reverse(string text) -> string` that returns the
+  reversed string. Return empty string for null or empty input.
+
+scoring:
+  dimensions:
+    - name: correctness
+      weight: 0.4
+    - name: code_quality
+      weight: 0.3
+    - name: performance
+      weight: 0.3
+  correctness_exponent: 4
+
+target_file: "StringReverser.cs"
+copy_paths: ["dotnet-reverse-string.csproj"]
+timeout: 30

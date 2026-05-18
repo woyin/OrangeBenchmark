@@ -4,7 +4,6 @@ import subprocess
 import re
 from pathlib import Path
 
-
 def score_correctness(generated_code: str, work_dir: str) -> float:
     if shutil.which("npm") is None:
         return 0.0
@@ -31,23 +30,6 @@ def score_correctness(generated_code: str, work_dir: str) -> float:
         return 0.0
     except Exception:
         return 0.0
-
-
-def score_code_quality(generated_code: str, work_dir: str) -> float:
-    if shutil.which("npm") is None:
-        return 0.0
-    try:
-        result = subprocess.run(
-            ["npx", "tsc", "--noEmit"],
-            cwd=work_dir, capture_output=True, text=True, timeout=30,
-        )
-        if result.returncode == 0:
-            return 1.0
-        errors = result.stdout.count("error TS")
-        return round(max(0.0, 1.0 - errors * 0.1), 4)
-    except Exception:
-        return 0.5
-
 
 def score_performance(generated_code: str, work_dir: str) -> float:
     return 0.7

@@ -5,10 +5,8 @@ import subprocess
 import time
 from pathlib import Path
 
-
 def _run(command: list[str], work_dir: str) -> subprocess.CompletedProcess:
     return subprocess.run(command, cwd=work_dir, capture_output=True, text=True, timeout=60)
-
 
 def score_correctness(generated_code: str, work_dir: str) -> float:
     if shutil.which("mvn") is None:
@@ -28,17 +26,6 @@ def score_correctness(generated_code: str, work_dir: str) -> float:
         return 0.0
     except Exception:
         return 0.0
-
-
-def score_code_quality(generated_code: str, work_dir: str) -> float:
-    if shutil.which("mvn") is None:
-        return 0.0
-    try:
-        result = _run(["mvn", "compile", "-q"], work_dir)
-        return 1.0 if result.returncode == 0 else 0.5
-    except Exception:
-        return 0.0
-
 
 def score_performance(generated_code: str, work_dir: str) -> float:
     """Benchmark with 50 tracks of 100 points each."""

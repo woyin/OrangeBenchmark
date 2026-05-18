@@ -1,6 +1,5 @@
 """Custom scoring for sorting-algo problem."""
 
-
 def score_performance(generated_code: str, work_dir: str) -> float:
     """Score performance based on code efficiency indicators."""
     code = generated_code.lower()

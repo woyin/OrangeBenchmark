@@ -2,7 +2,6 @@
 import subprocess
 from pathlib import Path
 
-
 def _run_test(work_dir: str) -> tuple[int, int]:
     test_script = Path(work_dir) / "tests" / "test_solution.sh"
     if not test_script.exists():
@@ -25,34 +24,12 @@ def _run_test(work_dir: str) -> tuple[int, int]:
     except Exception:
         return 0, 1
 
-
 def score_correctness(generated_code: str, work_dir: str) -> float:
     passed, total = _run_test(work_dir)
     if total == 0:
         return 0.0
     raw = passed / total
     return round(raw ** 2.0, 4)
-
-
-def score_code_quality(generated_code: str, work_dir: str) -> float:
-    target = Path(work_dir) / "solution.sh"
-    if not target.exists():
-        return 0.0
-    try:
-        result = subprocess.run(
-            ["shellcheck", str(target), "--severity=warning"],
-            capture_output=True, text=True, timeout=10,
-        )
-        if result.returncode == 0:
-            return 1.0
-        issues = result.stdout.strip().count("
-") + 1
-        return round(max(0.0, 1.0 - issues * 0.05), 4)
-    except FileNotFoundError:
-        return 0.8
-    except Exception:
-        return 0.5
-
 
 def score_performance(generated_code: str, work_dir: str) -> float:
     return 0.7

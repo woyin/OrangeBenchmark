@@ -9,7 +9,6 @@ METAR_SAMPLES = [
     "RJTT 050000Z 18012KT 9999 FEW030 SCT080 20/16 A2980 RMK SLP125",
 ]
 
-
 def score_performance(generated_code: str, work_dir: str) -> float:
     spec = importlib.util.spec_from_file_location(
         "metar_generated",

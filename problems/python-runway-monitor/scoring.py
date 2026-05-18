@@ -4,7 +4,6 @@ import importlib.util
 import time
 from pathlib import Path
 
-
 def score_performance(generated_code: str, work_dir: str) -> float:
     """Score performance by processing 1000 positions over a 4-runway airport."""
     work_path = Path(work_dir)
