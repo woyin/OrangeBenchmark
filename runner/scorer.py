@@ -151,25 +151,6 @@ def _run_dotnet_test(work_dir: Path, exponent: float = 4.0) -> float:
         return 0.0
 
 
-def _run_dotnet_build_quality(work_dir: Path) -> float:
-    try:
-        result = subprocess.run(
-            ["dotnet", "build", "--verbosity", "normal"],
-            cwd=work_dir,
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-        if result.returncode != 0:
-            return 0.5
-        warnings = result.stdout.count("warning")
-        if warnings == 0:
-            return 1.0
-        return round(max(0.0, 1.0 - warnings * 0.1), 4)
-    except Exception:
-        return 0.0
-
-
 def _continuous_performance_score(
     elapsed: float, fast: float, slow: float, ok: bool = True
 ) -> float:
