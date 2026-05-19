@@ -116,7 +116,7 @@ def _detect_dotnet(work_dir: Path) -> bool:
     return any(f.suffix == ".csproj" for f in work_dir.iterdir())
 
 
-def _run_dotnet_test(work_dir: Path) -> float:
+def _run_dotnet_test(work_dir: Path, exponent: float = 4.0) -> float:
     try:
         build = subprocess.run(
             ["dotnet", "build", "--verbosity", "quiet"],
@@ -128,13 +128,25 @@ def _run_dotnet_test(work_dir: Path) -> float:
         if build.returncode != 0:
             return 0.0
         result = subprocess.run(
-            ["dotnet", "test", "--no-build", "--verbosity", "quiet"],
+            ["dotnet", "test", "--no-build", "--verbosity", "normal"],
             cwd=work_dir,
             capture_output=True,
             text=True,
             timeout=60,
         )
-        return 1.0 if result.returncode == 0 else 0.0
+        if result.returncode == 0:
+            return 1.0
+        output = result.stdout + result.stderr
+        # Parse "X passed, Y failed" or "Total tests: X Failed: Y"
+        m = re.search(r"(\d+) passed", output)
+        if m:
+            passed = int(m.group(1))
+            failed_match = re.search(r"(\d+) failed", output)
+            failed = int(failed_match.group(1)) if failed_match else 0
+            total = passed + failed
+            if total > 0:
+                return round((passed / total) ** exponent, 4)
+        return 0.0
     except Exception:
         return 0.0
 
