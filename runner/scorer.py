@@ -53,23 +53,6 @@ def _run_pytest(work_dir: Path) -> tuple[int, int]:
     except Exception:
         return 0, 1
 
-
-def _run_ruff_check(file_path: Path) -> int:
-    """Run ruff check, return number of issues."""
-    try:
-        result = subprocess.run(
-            [sys.executable, "-m", "ruff", "check", str(file_path)],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0:
-            return 0
-        return len([line for line in result.stdout.strip().split("\n") if line.strip()])
-    except Exception:
-        return 0
-
-
 def _detect_java_maven(work_dir: Path) -> bool:
     return (work_dir / "pom.xml").exists()
 
