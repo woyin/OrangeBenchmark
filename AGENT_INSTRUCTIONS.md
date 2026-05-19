@@ -117,6 +117,8 @@ Your solutions are evaluated on multiple dimensions (weights vary per problem):
 | # | Problem | Difficulty | Category | Target File | Run Tests |
 |---|---------|-----------|----------|-------------|-----------|
 | 52 | `problems/wasm-calculator/` | hard | multi-lang | `src/lib.rs` | `cargo test --manifest-path problems/wasm-calculator/Cargo.toml` |
+| 53 | `problems/rust-fizz-buzz/` | easy | algorithm | `src/lib.rs` | `cargo test --manifest-path problems/rust-fizz-buzz/Cargo.toml` |
+| 54 | `problems/rust-string-manipulation/` | medium | string | `src/lib.rs` | `cargo test --manifest-path problems/rust-string-manipulation/Cargo.toml` |
 | 55 | `problems/rust-json-parser/` | medium | parsing | `src/lib.rs` | `cargo test --manifest-path problems/rust-json-parser/Cargo.toml` |
 | 56 | `problems/rust-lru-cache/` | medium | algorithm | `src/lib.rs` | `cargo test --manifest-path problems/rust-lru-cache/Cargo.toml` |
 
