@@ -548,57 +548,144 @@ def _default_correctness(work_dir: Path, exponent: float = 4.0) -> float:
 
 
 def _java_code_quality(work_dir: Path) -> float:
-    """Java code quality: Javadoc + exception handling + naming + structure."""
+    """Java code quality using unified 5-dimension framework."""
+    dimensions = {}
+
+    # static_analysis: compile + spotbugs
+    compile_ok = _run_maven_compile(work_dir) == 1.0
+    spotbugs = _run_spotbugs(work_dir) if compile_ok else 0.0
+    dimensions["static_analysis"] = round((compile_ok + spotbugs) / 2, 4) if compile_ok else 0.3
+
+    # documentation: check for Javadoc on public methods
+    dimensions["documentation"] = _java_documentation_score(work_dir)
+
+    # error_handling: check for try/catch, throws declarations
+    dimensions["error_handling"] = _java_error_handling_score(work_dir)
+
+    # naming_style: check for camelCase conventions
+    dimensions["naming_style"] = _java_naming_style_score(work_dir)
+
+    # structure: check for class organization, modularity
+    dimensions["structure"] = _java_structure_score(work_dir)
+
+    return _summarize_quality(dimensions)
+
+
+def _run_spotbugs(work_dir: Path) -> float:
+    """Run spotbugs if available, return quality score."""
+    try:
+        result = subprocess.run(
+            ["mvn", "spotbugs:check", "-q"],
+            cwd=work_dir,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        if result.returncode == 0:
+            return 1.0
+        bugs = result.stdout.count("bug")
+        return round(max(0.0, 1.0 - bugs * 0.1), 4)
+    except Exception:
+        return 0.5
+
+
+def _java_documentation_score(work_dir: Path) -> float:
     java_files = list(work_dir.rglob("*.java"))
     if not java_files:
         return 0.5
-    # Filter out test files
     src_files = [f for f in java_files if "test" not in str(f).lower()]
     if not src_files:
         src_files = java_files
-
-    total_score = 0.0
+    total = 0.0
     for f in src_files:
-        try:
-            source = f.read_text()
-        except Exception:
-            continue
-
-        score = 0.0
-        lines = source.split("\n")
-
-        # +0.35 Javadoc on public methods/classes
-        import re as _re
-        public_methods = _re.findall(r'public\s+(?:static\s+)?(?:\w+\s+)+(\w+)\s*\(', source)
-        public_classes = _re.findall(r'public\s+class\s+(\w+)', source)
-        public_count = len(public_methods) + len(public_classes)
-        javadoc_count = source.count("/**")
-        if public_count > 0:
-            score += 0.35 * min(javadoc_count / public_count, 1.0)
+        source = f.read_text()
+        public_methods = len(re.findall(r'\bpublic\b.*\b\w+\s*\([^)]*\)\s*\{', source))
+        javadocs = source.count("/**")
+        if public_methods == 0:
+            total += 0.8
         else:
-            score += 0.20
+            total += min(javadocs / public_methods, 1.0)
+    return round(total / len(src_files), 4)
 
-        # +0.20 exception handling
-        if "try" in source and ("catch" in source or "throws" in source):
-            score += 0.20
 
-        # +0.20 naming conventions (camelCase methods, PascalCase classes)
-        if public_classes:
-            score += 0.10
-        if public_methods:
-            camel_ok = sum(1 for m in public_methods if m[0].islower())
-            score += 0.10 * (camel_ok / len(public_methods) if public_methods else 0.5)
+def _java_error_handling_score(work_dir: Path) -> float:
+    java_files = list(work_dir.rglob("*.java"))
+    if not java_files:
+        return 0.5
+    src_files = [f for f in java_files if "test" not in str(f).lower()]
+    if not src_files:
+        src_files = java_files
+    total = 0.0
+    for f in src_files:
+        source = f.read_text()
+        score = 0.0
+        if "try" in source:
+            score += 0.3
+        if "catch" in source:
+            score += 0.3
+        if "throws" in source:
+            score += 0.2
+        if "finally" in source:
+            score += 0.2
+        total += min(score, 1.0)
+    return round(total / len(src_files), 4)
 
-        # +0.25 code structure (imports + class definition)
-        if "import " in source:
-            score += 0.10
+
+def _java_naming_style_score(work_dir: Path) -> float:
+    java_files = list(work_dir.rglob("*.java"))
+    if not java_files:
+        return 0.5
+    src_files = [f for f in java_files if "test" not in str(f).lower()]
+    if not src_files:
+        src_files = java_files
+    total = 0.0
+    for f in src_files:
+        source = f.read_text()
+        classes = re.findall(r'class\s+(\w+)', source)
+        methods = re.findall(r'(?:public|private|protected)?\s*(?:static\s+)?\w+\s+(\w+)\s*\(', source)
+        ok = 0
+        total_names = 0
+        for name in classes:
+            total_names += 1
+            if name[0].isupper():
+                ok += 1
+        for name in methods:
+            if name in ("if", "while", "for", "switch"):
+                continue
+            total_names += 1
+            if name[0].islower():
+                ok += 1
+        if total_names == 0:
+            total += 0.8
+        else:
+            total += ok / total_names
+    return round(total / len(src_files), 4)
+
+
+def _java_structure_score(work_dir: Path) -> float:
+    java_files = list(work_dir.rglob("*.java"))
+    if not java_files:
+        return 0.5
+    src_files = [f for f in java_files if "test" not in str(f).lower()]
+    if not src_files:
+        src_files = java_files
+    total = 0.0
+    for f in src_files:
+        source = f.read_text()
+        score = 0.0
         if "class " in source:
+            score += 0.3
+        if "interface " in source:
+            score += 0.2
+        methods = len(re.findall(r'\b\w+\s+\w+\s*\([^)]*\)\s*\{', source))
+        if methods >= 2:
+            score += 0.3
+        elif methods == 1:
             score += 0.15
-
-        total_score += score
-
-    return round(max(0.10, min(1.0, total_score / len(src_files))), 4)
-
+        if "package " in source:
+            score += 0.2
+        total += min(score, 1.0)
+    return round(total / len(src_files), 4)
 
 def _dotnet_code_quality(work_dir: Path) -> float:
     """Code quality: XML doc + exception handling + naming + build warnings."""
