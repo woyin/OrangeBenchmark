@@ -25,6 +25,15 @@ _QUALITY_DIMENSION_WEIGHTS = {
 }
 
 
+
+
+def _collect_source_files(work_dir: Path, pattern: str, exclude_tests: bool = True) -> list[Path]:
+    """Collect source files matching pattern, optionally excluding test files."""
+    files = list(work_dir.rglob(pattern))
+    if not exclude_tests:
+        return files
+    return [f for f in files if "test" not in str(f).lower()]
+
 def _summarize_quality(dimensions: dict[str, float]) -> float:
     """Weighted average of quality dimension scores (0-1 each)."""
     total = 0.0
@@ -597,12 +606,9 @@ def _run_spotbugs(work_dir: Path) -> float:
 
 
 def _java_documentation_score(work_dir: Path) -> float:
-    java_files = list(work_dir.rglob("*.java"))
-    if not java_files:
-        return 0.5
-    src_files = [f for f in java_files if "test" not in str(f).lower()]
+    src_files = _collect_source_files(work_dir, "*.java")
     if not src_files:
-        src_files = java_files
+        return 0.5
     total = 0.0
     for f in src_files:
         source = f.read_text()
@@ -616,12 +622,9 @@ def _java_documentation_score(work_dir: Path) -> float:
 
 
 def _java_error_handling_score(work_dir: Path) -> float:
-    java_files = list(work_dir.rglob("*.java"))
-    if not java_files:
-        return 0.5
-    src_files = [f for f in java_files if "test" not in str(f).lower()]
+    src_files = _collect_source_files(work_dir, "*.java")
     if not src_files:
-        src_files = java_files
+        return 0.5
     total = 0.0
     for f in src_files:
         source = f.read_text()
@@ -639,12 +642,9 @@ def _java_error_handling_score(work_dir: Path) -> float:
 
 
 def _java_naming_style_score(work_dir: Path) -> float:
-    java_files = list(work_dir.rglob("*.java"))
-    if not java_files:
-        return 0.5
-    src_files = [f for f in java_files if "test" not in str(f).lower()]
+    src_files = _collect_source_files(work_dir, "*.java")
     if not src_files:
-        src_files = java_files
+        return 0.5
     total = 0.0
     for f in src_files:
         source = f.read_text()
@@ -670,12 +670,9 @@ def _java_naming_style_score(work_dir: Path) -> float:
 
 
 def _java_structure_score(work_dir: Path) -> float:
-    java_files = list(work_dir.rglob("*.java"))
-    if not java_files:
-        return 0.5
-    src_files = [f for f in java_files if "test" not in str(f).lower()]
+    src_files = _collect_source_files(work_dir, "*.java")
     if not src_files:
-        src_files = java_files
+        return 0.5
     total = 0.0
     for f in src_files:
         source = f.read_text()
@@ -736,12 +733,9 @@ def _run_dotnet_build_with_warnings(work_dir: Path) -> tuple[bool, int]:
 
 
 def _dotnet_documentation_score(work_dir: Path) -> float:
-    cs_files = list(work_dir.rglob("*.cs"))
-    if not cs_files:
-        return 0.5
-    src_files = [f for f in cs_files if "test" not in str(f).lower() and "Test" not in f.name]
+    src_files = _collect_source_files(work_dir, "*.cs")
     if not src_files:
-        src_files = cs_files
+        return 0.5
     total = 0.0
     for f in src_files:
         source = f.read_text()
@@ -755,12 +749,9 @@ def _dotnet_documentation_score(work_dir: Path) -> float:
 
 
 def _dotnet_error_handling_score(work_dir: Path) -> float:
-    cs_files = list(work_dir.rglob("*.cs"))
-    if not cs_files:
-        return 0.5
-    src_files = [f for f in cs_files if "test" not in str(f).lower() and "Test" not in f.name]
+    src_files = _collect_source_files(work_dir, "*.cs")
     if not src_files:
-        src_files = cs_files
+        return 0.5
     total = 0.0
     for f in src_files:
         source = f.read_text()
@@ -778,12 +769,9 @@ def _dotnet_error_handling_score(work_dir: Path) -> float:
 
 
 def _dotnet_naming_style_score(work_dir: Path) -> float:
-    cs_files = list(work_dir.rglob("*.cs"))
-    if not cs_files:
-        return 0.5
-    src_files = [f for f in cs_files if "test" not in str(f).lower() and "Test" not in f.name]
+    src_files = _collect_source_files(work_dir, "*.cs")
     if not src_files:
-        src_files = cs_files
+        return 0.5
     total = 0.0
     for f in src_files:
         source = f.read_text()
@@ -809,12 +797,9 @@ def _dotnet_naming_style_score(work_dir: Path) -> float:
 
 
 def _dotnet_structure_score(work_dir: Path) -> float:
-    cs_files = list(work_dir.rglob("*.cs"))
-    if not cs_files:
-        return 0.5
-    src_files = [f for f in cs_files if "test" not in str(f).lower() and "Test" not in f.name]
+    src_files = _collect_source_files(work_dir, "*.cs")
     if not src_files:
-        src_files = cs_files
+        return 0.5
     total = 0.0
     for f in src_files:
         source = f.read_text()
@@ -836,10 +821,7 @@ def _dotnet_structure_score(work_dir: Path) -> float:
 
 def _react_code_quality(work_dir: Path) -> float:
     """React code quality using unified 5-dimension framework."""
-    tsx_files = list(work_dir.rglob("*.tsx")) + list(work_dir.rglob("*.ts"))
-    src_files = [f for f in tsx_files if "test" not in str(f).lower() and "node_modules" not in str(f)]
-    if not src_files:
-        src_files = tsx_files
+    src_files = _collect_source_files(work_dir, "*.tsx") + _collect_source_files(work_dir, "*.ts")
     if not src_files:
         return 0.5
 
@@ -931,10 +913,7 @@ def _react_typescript_check(work_dir: Path) -> float:
 
 def _bash_code_quality(work_dir: Path) -> float:
     """Bash code quality using unified 5-dimension framework."""
-    sh_files = list(work_dir.rglob("*.sh"))
-    src_files = [f for f in sh_files if "test" not in str(f).lower()]
-    if not src_files:
-        src_files = sh_files
+    src_files = _collect_source_files(work_dir, "*.sh")
     if not src_files:
         return 0.5
 
@@ -1019,10 +998,7 @@ def _bash_code_quality(work_dir: Path) -> float:
 
 def _rust_code_quality(work_dir: Path) -> float:
     """Rust code quality using unified 5-dimension framework."""
-    rs_files = list(work_dir.rglob("*.rs"))
-    src_files = [f for f in rs_files if "test" not in str(f).lower() and "target" not in str(f)]
-    if not src_files:
-        src_files = rs_files
+    src_files = _collect_source_files(work_dir, "*.rs")
     if not src_files:
         return 0.5
 
