@@ -688,70 +688,143 @@ def _java_structure_score(work_dir: Path) -> float:
     return round(total / len(src_files), 4)
 
 def _dotnet_code_quality(work_dir: Path) -> float:
-    """Code quality: XML doc + exception handling + naming + build warnings."""
+    """.NET code quality using unified 5-dimension framework."""
+    dimensions = {}
+
+    # static_analysis: build warnings + compile
+    build_ok, warnings = _run_dotnet_build_with_warnings(work_dir)
+    dimensions["static_analysis"] = round(1.0 - min(warnings * 0.05, 0.5), 4) if build_ok else 0.3
+
+    # documentation: XML doc comments
+    dimensions["documentation"] = _dotnet_documentation_score(work_dir)
+
+    # error_handling: try/catch, throw
+    dimensions["error_handling"] = _dotnet_error_handling_score(work_dir)
+
+    # naming_style: PascalCase for methods/classes, camelCase for variables
+    dimensions["naming_style"] = _dotnet_naming_style_score(work_dir)
+
+    # structure: namespaces, classes, methods
+    dimensions["structure"] = _dotnet_structure_score(work_dir)
+
+    return _summarize_quality(dimensions)
+
+
+def _run_dotnet_build_with_warnings(work_dir: Path) -> tuple[bool, int]:
+    """Run dotnet build and return (success, warning_count)."""
+    try:
+        result = subprocess.run(
+            ["dotnet", "build", "--verbosity", "normal"],
+            cwd=work_dir,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if result.returncode != 0:
+            return False, 0
+        warnings = result.stdout.count("warning")
+        return True, warnings
+    except Exception:
+        return False, 0
+
+
+def _dotnet_documentation_score(work_dir: Path) -> float:
     cs_files = list(work_dir.rglob("*.cs"))
     if not cs_files:
         return 0.5
     src_files = [f for f in cs_files if "test" not in str(f).lower() and "Test" not in f.name]
     if not src_files:
         src_files = cs_files
-
-    total_score = 0.0
+    total = 0.0
     for f in src_files:
-        try:
-            source = f.read_text()
-        except Exception:
-            continue
+        source = f.read_text()
+        public_members = len(re.findall(r'\bpublic\b', source))
+        xml_docs = len(re.findall(r'\s*///', source))
+        if public_members == 0:
+            total += 0.8
+        else:
+            total += min(xml_docs / public_members, 1.0)
+    return round(total / len(src_files), 4)
 
+
+def _dotnet_error_handling_score(work_dir: Path) -> float:
+    cs_files = list(work_dir.rglob("*.cs"))
+    if not cs_files:
+        return 0.5
+    src_files = [f for f in cs_files if "test" not in str(f).lower() and "Test" not in f.name]
+    if not src_files:
+        src_files = cs_files
+    total = 0.0
+    for f in src_files:
+        source = f.read_text()
         score = 0.0
+        if "try" in source:
+            score += 0.3
+        if "catch" in source:
+            score += 0.3
+        if "throw" in source:
+            score += 0.2
+        if "finally" in source:
+            score += 0.2
+        total += min(score, 1.0)
+    return round(total / len(src_files), 4)
 
-        # +0.30 XML doc comments (/// on public methods/classes)
-        import re as _re
-        public_methods = _re.findall(r'public\s+(?:static\s+)?(?:override\s+)?(?:\w+\s+)+(\w+)\s*[\(<]', source)
-        public_classes = _re.findall(r'public\s+class\s+(\w+)', source)
-        public_count = len(public_methods) + len(public_classes)
-        xml_doc_count = source.count("/// <summary>")
-        if public_count > 0:
-            score += 0.30 * min(xml_doc_count / public_count, 1.0)
+
+def _dotnet_naming_style_score(work_dir: Path) -> float:
+    cs_files = list(work_dir.rglob("*.cs"))
+    if not cs_files:
+        return 0.5
+    src_files = [f for f in cs_files if "test" not in str(f).lower() and "Test" not in f.name]
+    if not src_files:
+        src_files = cs_files
+    total = 0.0
+    for f in src_files:
+        source = f.read_text()
+        classes = re.findall(r'class\s+(\w+)', source)
+        methods = re.findall(r'(?:public|private|protected|internal)?\s*(?:static\s+)?\w+\s+(\w+)\s*\(', source)
+        ok = 0
+        total_names = 0
+        for name in classes:
+            total_names += 1
+            if name[0].isupper():
+                ok += 1
+        for name in methods:
+            if name in ("if", "while", "for", "switch", "using"):
+                continue
+            total_names += 1
+            if name[0].isupper():
+                ok += 1
+        if total_names == 0:
+            total += 0.8
         else:
+            total += ok / total_names
+    return round(total / len(src_files), 4)
+
+
+def _dotnet_structure_score(work_dir: Path) -> float:
+    cs_files = list(work_dir.rglob("*.cs"))
+    if not cs_files:
+        return 0.5
+    src_files = [f for f in cs_files if "test" not in str(f).lower() and "Test" not in f.name]
+    if not src_files:
+        src_files = cs_files
+    total = 0.0
+    for f in src_files:
+        source = f.read_text()
+        score = 0.0
+        if "namespace " in source:
+            score += 0.2
+        if "class " in source:
+            score += 0.3
+        if "interface " in source:
+            score += 0.2
+        methods = len(re.findall(r'\b\w+\s+\w+\s*\([^)]*\)\s*\{', source))
+        if methods >= 2:
+            score += 0.3
+        elif methods == 1:
             score += 0.15
-
-        # +0.20 exception handling
-        if "try" in source and "catch" in source:
-            score += 0.20
-
-        # +0.20 naming (PascalCase methods)
-        if public_methods:
-            pascal_ok = sum(1 for m in public_methods if m[0].isupper())
-            score += 0.20 * (pascal_ok / len(public_methods))
-        else:
-            score += 0.10
-
-        # +0.15 structure (using + class)
-        if "using " in source:
-            score += 0.05
-        if "class " in source or "struct " in source:
-            score += 0.10
-
-        total_score += score
-
-    base = total_score / len(src_files)
-
-    # +0.15 build warnings (deduction-based)
-    try:
-        result = subprocess.run(
-            ["dotnet", "build", "--verbosity", "normal"],
-            cwd=work_dir, capture_output=True, text=True, timeout=60,
-        )
-        if result.returncode != 0:
-            base -= 0.20
-        else:
-            warnings = result.stdout.lower().count("warning")
-            base -= min(warnings * 0.03, 0.15)
-    except Exception:
-        pass
-
-    return round(max(0.10, min(1.0, base)), 4)
+        total += min(score, 1.0)
+    return round(total / len(src_files), 4)
 
 
 def _react_code_quality(work_dir: Path) -> float:
