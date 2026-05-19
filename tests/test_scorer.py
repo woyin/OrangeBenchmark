@@ -139,3 +139,20 @@ def test_resource_efficiency_score_unclosed_file():
         path = Path(f.name)
     score = _resource_efficiency_score(path)
     assert score < 1.0
+
+
+def test_load_custom_scorer_existing():
+    from runner.scorer import _load_custom_scorer
+    from pathlib import Path
+    scorer = _load_custom_scorer(Path("problems/two-sum"))
+    assert scorer is not None
+    assert hasattr(scorer, "score_performance")
+
+
+def test_load_custom_scorer_missing():
+    from runner.scorer import _load_custom_scorer
+    import tempfile
+    from pathlib import Path
+    with tempfile.TemporaryDirectory() as tmpdir:
+        scorer = _load_custom_scorer(Path(tmpdir))
+        assert scorer is None
