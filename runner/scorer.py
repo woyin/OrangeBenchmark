@@ -1110,6 +1110,34 @@ def _rust_code_quality(work_dir: Path) -> float:
     return _summarize_quality(dimensions)
 
 
+def _python_code_quality(target_path: Path) -> dict[str, float]:
+    """Python code quality broken into unified dimensions."""
+    if not target_path.exists():
+        return {k: 0.0 for k in _QUALITY_DIMENSION_WEIGHTS}
+
+    dimensions = {}
+
+    # static_analysis: lint score
+    lint_issues = _count_ruff_issues(target_path)
+    loc = max(len(target_path.read_text().strip().split("\n")), 1)
+    dimensions["static_analysis"] = round(max(0.0, 1.0 - lint_issues / loc), 4)
+
+    # documentation: docstrings
+    dimensions["documentation"] = _docstring_score(target_path)
+
+    # error_handling: try/except/raise
+    dimensions["error_handling"] = _error_handling_score(target_path)
+
+    # naming_style: type hints coverage
+    dimensions["naming_style"] = _type_hint_score(target_path)
+
+    # structure: complexity
+    complexity = _complexity_score(target_path)
+    dimensions["structure"] = complexity
+
+    return dimensions
+
+
 def _default_code_quality(target_path: Path, work_dir: Path) -> float:
     """Default code quality: auto-detect project type."""
     if _detect_java_maven(work_dir):
@@ -1128,28 +1156,5 @@ def _default_code_quality(target_path: Path, work_dir: Path) -> float:
     if not target_path.exists():
         return 0.0
 
-    deductions = 0.0
-
-    # Lint violations: -0.03 each, max -0.30
-    lint_issues = _count_ruff_issues(target_path)
-    deductions += min(lint_issues * 0.03, 0.30)
-
-    # Missing type hints: proportional, max -0.25
-    type_score = _type_hint_score(target_path)
-    deductions += min((1 - type_score) * 0.25, 0.25)
-
-    # Missing docstrings: proportional, max -0.20
-    doc_score = _docstring_score(target_path)
-    deductions += min((1 - doc_score) * 0.20, 0.20)
-
-    # Cyclomatic complexity excess: -0.05 per 0.1 over 0.3, max -0.20
-    complexity_score = _complexity_score(target_path)
-    excess = 1 - complexity_score
-    if excess > 0.3:
-        deductions += min(((excess - 0.3) / 0.1) * 0.05, 0.20)
-
-    # Missing error handling: proportional, max -0.20
-    error_score = _error_handling_score(target_path)
-    deductions += min((1 - error_score) * 0.20, 0.20)
-
-    return round(max(0.10, 1.0 - deductions * 0.80), 4)
+    dimensions = _python_code_quality(target_path)
+    return _summarize_quality(dimensions)
