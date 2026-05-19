@@ -7,6 +7,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Subprocess timeouts (seconds)
+_TIMEOUT_SHORT = 10
+_TIMEOUT_DEFAULT = 30
+_TIMEOUT_LONG = 60
+_TIMEOUT_VERY_LONG = 120
+
+
 
 # Unified quality dimension weights (applied across all languages)
 _QUALITY_DIMENSION_WEIGHTS = {
@@ -39,7 +46,7 @@ def _run_pytest(work_dir: Path) -> tuple[int, int]:
             [sys.executable, "-m", "pytest", str(work_dir), "-v", "--tb=no", "-q"],
             capture_output=True,
             text=True,
-            timeout=30,
+            timeout=_TIMEOUT_DEFAULT,
         )
         output = result.stdout + result.stderr
         m_passed = re.search(r"(\d+) passed", output)
@@ -64,7 +71,7 @@ def _run_maven_test(work_dir: Path, exponent: float = 4.0) -> float:
             cwd=work_dir,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=_TIMEOUT_LONG,
         )
         if result.returncode == 0:
             return 1.0
@@ -88,7 +95,7 @@ def _run_maven_compile(work_dir: Path) -> float:
             cwd=work_dir,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=_TIMEOUT_LONG,
         )
         return 1.0 if result.returncode == 0 else 0.5
     except Exception:
@@ -106,7 +113,7 @@ def _run_dotnet_test(work_dir: Path, exponent: float = 4.0) -> float:
             cwd=work_dir,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=_TIMEOUT_LONG,
         )
         if build.returncode != 0:
             return 0.0
@@ -115,7 +122,7 @@ def _run_dotnet_test(work_dir: Path, exponent: float = 4.0) -> float:
             cwd=work_dir,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=_TIMEOUT_LONG,
         )
         if result.returncode == 0:
             return 1.0
@@ -154,7 +161,7 @@ def _ruff_lint_score(file_path: Path) -> float:
         result = subprocess.run(
             [sys.executable, "-m", "ruff", "check", str(file_path),
              "--output-format", "json"],
-            capture_output=True, text=True, timeout=10,
+            capture_output=True, text=True, timeout=_TIMEOUT_SHORT,
         )
         if result.returncode == 0:
             return 1.0
@@ -177,7 +184,7 @@ def _count_ruff_issues(file_path: Path) -> int:
         result = subprocess.run(
             [sys.executable, "-m", "ruff", "check", str(file_path),
              "--output-format", "json"],
-            capture_output=True, text=True, timeout=10,
+            capture_output=True, text=True, timeout=_TIMEOUT_SHORT,
         )
         if result.returncode == 0:
             return 0
@@ -579,7 +586,7 @@ def _run_spotbugs(work_dir: Path) -> float:
             cwd=work_dir,
             capture_output=True,
             text=True,
-            timeout=120,
+            timeout=_TIMEOUT_VERY_LONG,
         )
         if result.returncode == 0:
             return 1.0
@@ -718,7 +725,7 @@ def _run_dotnet_build_with_warnings(work_dir: Path) -> tuple[bool, int]:
             cwd=work_dir,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=_TIMEOUT_LONG,
         )
         if result.returncode != 0:
             return False, 0
@@ -912,7 +919,7 @@ def _react_typescript_check(work_dir: Path) -> float:
             cwd=work_dir,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=_TIMEOUT_LONG,
         )
         if result.returncode == 0:
             return 1.0
@@ -996,7 +1003,7 @@ def _bash_code_quality(work_dir: Path) -> float:
                 ["shellcheck", str(f)],
                 capture_output=True,
                 text=True,
-                timeout=10,
+                timeout=_TIMEOUT_SHORT,
             )
             if result.returncode == 0:
                 total_static += 1.0
@@ -1096,7 +1103,7 @@ def _rust_code_quality(work_dir: Path) -> float:
                 cwd=work_dir,
                 capture_output=True,
                 text=True,
-                timeout=60,
+                timeout=_TIMEOUT_LONG,
             )
             if result.returncode == 0:
                 total_static += 1.0
