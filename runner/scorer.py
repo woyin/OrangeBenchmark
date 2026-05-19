@@ -828,178 +828,288 @@ def _dotnet_structure_score(work_dir: Path) -> float:
 
 
 def _react_code_quality(work_dir: Path) -> float:
-    """React code quality: TypeScript types + component structure + events."""
-    ts_files = list(work_dir.rglob("*.tsx")) + list(work_dir.rglob("*.ts"))
-    if not ts_files:
-        return 0.5
-    src_files = [f for f in ts_files if "test" not in str(f).lower() and "node_modules" not in str(f)]
+    """React code quality using unified 5-dimension framework."""
+    tsx_files = list(work_dir.rglob("*.tsx")) + list(work_dir.rglob("*.ts"))
+    src_files = [f for f in tsx_files if "test" not in str(f).lower() and "node_modules" not in str(f)]
     if not src_files:
-        src_files = ts_files[:3]
+        src_files = tsx_files
+    if not src_files:
+        return 0.5
 
-    total_score = 0.0
+    dimensions = {}
+
+    # static_analysis: TypeScript compilation check (tsc --noEmit)
+    dimensions["static_analysis"] = _react_typescript_check(work_dir)
+
+    # documentation: JSDoc / inline comments
+    total_docs = 0.0
     for f in src_files:
-        try:
-            source = f.read_text()
-        except Exception:
-            continue
+        source = f.read_text()
+        comments = source.count("//") + source.count("/*")
+        loc = max(len(source.split("\n")), 1)
+        total_docs += min(comments / (loc * 0.1), 1.0)
+    dimensions["documentation"] = round(total_docs / len(src_files), 4)
 
+    # error_handling: error boundaries, try/catch
+    total_err = 0.0
+    for f in src_files:
+        source = f.read_text()
         score = 0.0
+        if "try" in source:
+            score += 0.3
+        if "catch" in source:
+            score += 0.3
+        if "ErrorBoundary" in source or "error boundary" in source.lower():
+            score += 0.4
+        total_err += min(score, 1.0)
+    dimensions["error_handling"] = round(total_err / len(src_files), 4)
 
-        # +0.30 TypeScript types (interface/type/React.FC)
-        if "interface " in source or "type " in source:
-            score += 0.20
-        if ": " in source and ("string" in source or "number" in source or "boolean" in source):
-            score += 0.10
+    # naming_style: PascalCase for components, camelCase for hooks/utils
+    total_name = 0.0
+    for f in src_files:
+        source = f.read_text()
+        components = re.findall(r'(?:function|const)\s+(\w+)', source)
+        ok = 0
+        for name in components:
+            if name[0].isupper():  # PascalCase for components
+                ok += 1
+            elif name.startswith("use"):  # hooks
+                ok += 1
+            elif name[0].islower():  # camelCase
+                ok += 1
+        if components:
+            total_name += ok / len(components)
+        else:
+            total_name += 0.8
+    dimensions["naming_style"] = round(total_name / len(src_files), 4)
 
-        # +0.30 component structure (export default/function component)
-        if "export default" in source or "export function" in source:
-            score += 0.15
-        if "return (" in source or "return <" in source:
-            score += 0.15
-
-        # +0.20 event handling (onClick/onChange/etc)
-        import re as _re
-        if _re.search(r'on[A-Z]\w+', source):
-            score += 0.20
-
-        # +0.20 code organization (imports)
+    # structure: component decomposition (multiple components/hooks)
+    total_struct = 0.0
+    for f in src_files:
+        source = f.read_text()
+        score = 0.0
+        exports = len(re.findall(r'export\s+(?:default\s+)?', source))
+        if exports >= 1:
+            score += 0.3
+        components = len(re.findall(r'(?:function|const)\s+\w+\s*[:=].*=>', source))
+        if components >= 2:
+            score += 0.4
+        elif components == 1:
+            score += 0.2
         if "import " in source:
-            score += 0.10
-        if "from " in source:
-            score += 0.10
+            score += 0.3
+        total_struct += min(score, 1.0)
+    dimensions["structure"] = round(total_struct / len(src_files), 4)
 
-        total_score += score
+    return _summarize_quality(dimensions)
 
-    return round(max(0.10, min(1.0, total_score / len(src_files))), 4)
+
+def _react_typescript_check(work_dir: Path) -> float:
+    """Run TypeScript compiler for static analysis score."""
+    try:
+        result = subprocess.run(
+            ["npx", "tsc", "--noEmit"],
+            cwd=work_dir,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if result.returncode == 0:
+            return 1.0
+        errors = result.stdout.count("error TS")
+        return round(max(0.0, 1.0 - errors * 0.1), 4)
+    except Exception:
+        return 0.5
 
 
 def _bash_code_quality(work_dir: Path) -> float:
-    """Bash code quality: shebang + quoting + error handling + functions."""
+    """Bash code quality using unified 5-dimension framework."""
     sh_files = list(work_dir.rglob("*.sh"))
-    if not sh_files:
-        return 0.5
     src_files = [f for f in sh_files if "test" not in str(f).lower()]
     if not src_files:
         src_files = sh_files
+    if not src_files:
+        return 0.5
 
-    total_score = 0.0
+    dimensions = {}
+
+    # documentation: comments
+    total = 0.0
+    for f in src_files:
+        source = f.read_text()
+        lines = source.split("\n")
+        comments = sum(1 for line in lines if line.strip().startswith("#"))
+        loc = max(len(lines), 1)
+        total += min(comments / (loc * 0.05), 1.0)
+    dimensions["documentation"] = round(total / len(src_files), 4)
+
+    # error_handling: set -e, trap, exit checks
+    total_err = 0.0
+    for f in src_files:
+        source = f.read_text()
+        score = 0.0
+        if "set -e" in source or "set -o errexit" in source:
+            score += 0.4
+        if "trap " in source:
+            score += 0.3
+        if "exit " in source or "return " in source:
+            score += 0.3
+        total_err += min(score, 1.0)
+    dimensions["error_handling"] = round(total_err / len(src_files), 4)
+
+    # naming_style: variable quoting (best practice)
+    total_name = 0.0
+    for f in src_files:
+        source = f.read_text()
+        var_refs = re.findall(r'\$\w+', source)
+        quoted_vars = re.findall(r'"\$\w+', source)
+        if var_refs:
+            total_name += min(len(quoted_vars) / len(var_refs) * 1.5, 1.0)
+        else:
+            total_name += 0.8
+    dimensions["naming_style"] = round(total_name / len(src_files), 4)
+
+    # structure: functions, modularity
+    total_struct = 0.0
+    for f in src_files:
+        source = f.read_text()
+        lines = source.split("\n")
+        score = 0.0
+        funcs = len(re.findall(r'^\s*\w+\s*\(\)', source, re.MULTILINE))
+        funcs += len(re.findall(r'^\s*function\s+\w+', source, re.MULTILINE))
+        if funcs >= 2:
+            score += 0.5
+        elif funcs == 1:
+            score += 0.3
+        if len(lines) > 20 and funcs == 0:
+            score += 0.1
+        if "source " in source or ". " in source:
+            score += 0.2
+        total_struct += min(score, 1.0)
+    dimensions["structure"] = round(total_struct / len(src_files), 4)
+
+    # static_analysis: shellcheck (if available)
+    total_static = 0.0
     for f in src_files:
         try:
-            source = f.read_text()
+            result = subprocess.run(
+                ["shellcheck", str(f)],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            if result.returncode == 0:
+                total_static += 1.0
+            else:
+                issues = result.stdout.count("SC")
+                total_static += max(0.0, 1.0 - issues * 0.1)
         except Exception:
-            continue
+            total_static += 0.5
+    dimensions["static_analysis"] = round(total_static / len(src_files), 4)
 
-        score = 0.0
-        lines = source.split("\n")
-
-        # +0.15 shebang
-        if lines and lines[0].startswith("#!"):
-            score += 0.15
-
-        # +0.25 variable quoting ($var in double quotes)
-        import re as _re
-        var_refs = _re.findall(r'\$\w+', source)
-        quoted_vars = _re.findall(r'"\$\w+', source)
-        if var_refs:
-            quote_ratio = len(quoted_vars) / len(var_refs)
-            score += 0.25 * min(quote_ratio * 1.5, 1.0)  # Boost a bit
-        else:
-            score += 0.10
-
-        # +0.30 error handling (set -e / trap / exit)
-        if "set -e" in source or "set -o errexit" in source:
-            score += 0.15
-        elif "trap " in source:
-            score += 0.10
-        if "exit " in source or "return " in source:
-            score += 0.15
-
-        # +0.30 function definitions
-        func_count = source.count("()") + len(_re.findall(r'^\s*function\s+\w+', source, _re.MULTILINE))
-        if func_count > 0:
-            score += 0.30
-        elif len(lines) > 20:
-            score += 0.10  # Non-trivial script without functions
-
-        total_score += score
-
-    return round(max(0.10, min(1.0, total_score / len(src_files))), 4)
+    return _summarize_quality(dimensions)
 
 
 def _rust_code_quality(work_dir: Path) -> float:
-    """Rust code quality: docs + error handling + naming + structure."""
+    """Rust code quality using unified 5-dimension framework."""
     rs_files = list(work_dir.rglob("*.rs"))
-    if not rs_files:
-        return 0.5
     src_files = [f for f in rs_files if "test" not in str(f).lower() and "target" not in str(f)]
     if not src_files:
         src_files = rs_files
+    if not src_files:
+        return 0.5
 
-    total_score = 0.0
+    dimensions = {}
+
+    # documentation: doc comments (/// or //!)
+    total_docs = 0.0
+    for f in src_files:
+        source = f.read_text()
+        doc_lines = sum(1 for line in source.split("\n") if line.strip().startswith("///") or line.strip().startswith("//!"))
+        funcs = source.count("fn ")
+        if funcs > 0:
+            total_docs += min(doc_lines / funcs, 1.0)
+        else:
+            total_docs += 0.8
+    dimensions["documentation"] = round(total_docs / len(src_files), 4)
+
+    # error_handling: Result, Option, ?, unwrap/expect
+    total_err = 0.0
+    for f in src_files:
+        source = f.read_text()
+        score = 0.0
+        if "Result<" in source:
+            score += 0.3
+        if "Option<" in source:
+            score += 0.2
+        if "?" in source:
+            score += 0.3
+        if source.count("unwrap()") == 0 and source.count("expect(") == 0:
+            score += 0.2
+        total_err += min(score, 1.0)
+    dimensions["error_handling"] = round(total_err / len(src_files), 4)
+
+    # naming_style: snake_case for functions, PascalCase for types
+    total_name = 0.0
+    for f in src_files:
+        source = f.read_text()
+        fns = re.findall(r'fn\s+(\w+)', source)
+        types = re.findall(r'(?:struct|enum|trait)\s+(\w+)', source)
+        ok = 0
+        total_names = 0
+        for name in fns:
+            total_names += 1
+            if "_" in name or name.islower():
+                ok += 1
+        for name in types:
+            total_names += 1
+            if name[0].isupper():
+                ok += 1
+        if total_names == 0:
+            total_name += 0.8
+        else:
+            total_name += ok / total_names
+    dimensions["naming_style"] = round(total_name / len(src_files), 4)
+
+    # structure: modules, visibility, traits
+    total_struct = 0.0
+    for f in src_files:
+        source = f.read_text()
+        score = 0.0
+        if "mod " in source:
+            score += 0.2
+        if "use " in source:
+            score += 0.2
+        if "pub " in source:
+            score += 0.3
+        if "impl " in source or "trait " in source:
+            score += 0.3
+        total_struct += min(score, 1.0)
+    dimensions["structure"] = round(total_struct / len(src_files), 4)
+
+    # static_analysis: cargo check
+    total_static = 0.0
     for f in src_files:
         try:
-            source = f.read_text()
+            result = subprocess.run(
+                ["cargo", "check"],
+                cwd=work_dir,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            if result.returncode == 0:
+                total_static += 1.0
+            else:
+                errors = result.stderr.count("error[")
+                total_static += max(0.0, 1.0 - errors * 0.1)
         except Exception:
-            continue
+            total_static += 0.5
+    dimensions["static_analysis"] = round(total_static / len(src_files), 4)
 
-        score = 0.0
-
-        # +0.30 documentation comments (/// or //!)
-        doc_lines = sum(1 for line in source.split("\n") if line.strip().startswith("///") or line.strip().startswith("//!"))
-        func_count = source.count("fn ")
-        if func_count > 0:
-            score += 0.30 * min(doc_lines / func_count, 1.0)
-        else:
-            score += 0.15
-
-        # +0.25 error handling (Result/unwrap/expect/?)
-        if "Result<" in source or "unwrap()" in source or "expect(" in source:
-            score += 0.15
-        if "?" in source:
-            score += 0.10
-
-        # +0.20 naming (snake_case functions)
-        import re as _re
-        fns = _re.findall(r'fn\s+(\w+)', source)
-        if fns:
-            snake_ok = sum(1 for fn in fns if "_" in fn or fn.islower())
-            score += 0.20 * (snake_ok / len(fns))
-        else:
-            score += 0.10
-
-        # +0.25 structure (mod/use/pub)
-        if "use " in source or "mod " in source:
-            score += 0.10
-        if "pub " in source:
-            score += 0.15
-
-        total_score += score
-
-    return round(max(0.10, min(1.0, total_score / len(src_files))), 4)
+    return _summarize_quality(dimensions)
 
 
-
-# Quality dimension weights (unified across languages)
-_QUALITY_DIMENSION_WEIGHTS = {
-    "documentation": 0.20,
-    "error_handling": 0.20,
-    "naming_style": 0.20,
-    "structure": 0.20,
-    "static_analysis": 0.20,
-}
-
-
-def _summarize_quality(dimensions: dict[str, float]) -> float:
-    """Weighted average of quality dimension scores (0-1 each)."""
-    total = 0.0
-    weight_sum = 0.0
-    for dim, weight in _QUALITY_DIMENSION_WEIGHTS.items():
-        score = dimensions.get(dim, 0.5)
-        total += score * weight
-        weight_sum += weight
-    if weight_sum == 0:
-        return 0.5
-    return round(min(max(total / weight_sum, 0.10), 1.0), 4)
 def _default_code_quality(target_path: Path, work_dir: Path) -> float:
     """Default code quality: auto-detect project type."""
     if _detect_java_maven(work_dir):
