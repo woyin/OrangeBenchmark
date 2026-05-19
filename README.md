@@ -29,7 +29,7 @@ uv run orangebench ranking
 ```
 OrangeBenchmark/
 ├── AGENT_INSTRUCTIONS.md    # 给 Coding Agent 的任务说明
-├── problems/                # 评测题目（56 道，6 种语言）
+├── problems/                # 评测题目（58 道，6 种语言）
 │   ├── _template/           # 新题目脚手架
 │   ├── _examples/           # 题目结构参考示例
 │   ├── two-sum/             # Python 题目
@@ -83,7 +83,7 @@ uv run orangebench ranking --category algorithm
 uv run orangebench show --model "gpt-4o"
 ```
 
-## 题目列表（56 道，6 种语言）
+## 题目列表（58 道，6 种语言）
 
 ### Python（16 道）
 
@@ -150,7 +150,7 @@ uv run orangebench show --model "gpt-4o"
 | 44 | bash-process-monitor | medium | system |
 | 45 | bash-backup-rotation | hard | system |
 
-### .NET / C#（6 道）
+### .NET / C#（8 道）
 
 | # | 题目 | 难度 | 类别 |
 |---|------|------|------|
@@ -160,12 +160,18 @@ uv run orangebench show --model "gpt-4o"
 | 49 | dotnet-json-transform | medium | data |
 | 50 | dotnet-rate-limiter | hard | concurrency |
 | 51 | dotnet-text-search | medium | algorithm |
+| 52 | dotnet-palindrome-checker | easy | string |
+| 53 | dotnet-reverse-string | easy | string |
 
-### Rust（1 道）
+### Rust（5 道）
 
 | # | 题目 | 难度 | 类别 |
 |---|------|------|------|
-| 52 | wasm-calculator | hard | multi-lang |
+| 54 | wasm-calculator | hard | multi-lang |
+| 55 | rust-fizz-buzz | easy | algorithm |
+| 56 | rust-string-manipulation | medium | string |
+| 57 | rust-json-parser | medium | parsing |
+| 58 | rust-lru-cache | medium | algorithm |
 
 ## 评分维度
 
