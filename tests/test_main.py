@@ -1,8 +1,10 @@
-from runner.main import _trim_mean, _detect_language
+from typer.testing import CliRunner
+from runner.main import _trim_mean, _detect_language, app
+
+runner = CliRunner()
 
 
 def test_trim_mean_basic():
-    # [1,2,3,4,5] sorted -> remove bottom 10% (1 item) -> [2,3,4,5] avg = 3.5
     assert _trim_mean([1.0, 2.0, 3.0, 4.0, 5.0]) == 3.5
 
 
@@ -25,12 +27,6 @@ def test_detect_language():
     assert _detect_language("two-sum") == "python"
 
 
-from typer.testing import CliRunner
-from runner.main import app
-
-runner = CliRunner()
-
-
 def test_list_problems_command():
     result = runner.invoke(app, ["list-problems"])
     assert result.exit_code == 0
@@ -45,5 +41,4 @@ def test_list_problems_filter_by_language():
 
 def test_breakdown_command():
     result = runner.invoke(app, ["breakdown", "--by", "language"])
-    # May fail if no results, but command structure should work
-    assert result.exit_code in (0, 1)  # 1 if no results
+    assert result.exit_code in (0, 1)
