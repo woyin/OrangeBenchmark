@@ -29,7 +29,7 @@ uv run orangebench ranking
 ```
 OrangeBenchmark/
 ├── AGENT_INSTRUCTIONS.md    # 给 Coding Agent 的任务说明
-├── problems/                # 评测题目（52 道，6 种语言）
+├── problems/                # 评测题目（56 道，6 种语言）
 │   ├── _template/           # 新题目脚手架
 │   ├── _examples/           # 题目结构参考示例
 │   ├── two-sum/             # Python 题目
@@ -83,7 +83,7 @@ uv run orangebench ranking --category algorithm
 uv run orangebench show --model "gpt-4o"
 ```
 
-## 题目列表（52 道，6 种语言）
+## 题目列表（56 道，6 种语言）
 
 ### Python（16 道）
 

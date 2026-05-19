@@ -56,6 +56,8 @@ EXPECTED_PROBLEMS = {
     "regex-engine",
     "rest-api",
     "rust-fizz-buzz",
+    "rust-json-parser",
+    "rust-lru-cache",
     "rust-string-manipulation",
     "task-scheduler",
     "text-editor",
