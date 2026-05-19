@@ -8,6 +8,30 @@ import sys
 from pathlib import Path
 
 
+# Unified quality dimension weights (applied across all languages)
+_QUALITY_DIMENSION_WEIGHTS = {
+    "documentation": 0.20,
+    "error_handling": 0.20,
+    "naming_style": 0.20,
+    "structure": 0.20,
+    "static_analysis": 0.20,
+}
+
+
+def _summarize_quality(dimensions: dict[str, float]) -> float:
+    """Weighted average of quality dimension scores (0-1 each)."""
+    total = 0.0
+    weight_sum = 0.0
+    for dim, weight in _QUALITY_DIMENSION_WEIGHTS.items():
+        score = dimensions.get(dim, 0.5)
+        total += score * weight
+        weight_sum += weight
+    if weight_sum == 0:
+        return 0.5
+    return round(min(max(total / weight_sum, 0.10), 1.0), 4)
+
+
+
 def _run_pytest(work_dir: Path) -> tuple[int, int]:
     """Run pytest in work_dir, return (passed, total)."""
     try:
