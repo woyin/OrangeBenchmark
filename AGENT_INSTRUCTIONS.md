@@ -89,38 +89,40 @@ Your solutions are evaluated on multiple dimensions (weights vary per problem):
 | 37 | `problems/dotnet-json-transform/` | medium | data | `JsonTransformer.cs` | `cd problems/dotnet-json-transform && dotnet test` |
 | 38 | `problems/dotnet-rate-limiter/` | hard | concurrency | `RateLimiter.cs` | `cd problems/dotnet-rate-limiter && dotnet test` |
 | 39 | `problems/dotnet-text-search/` | medium | algorithm | `TextSearchIndex.cs` | `cd problems/dotnet-text-search && dotnet test` |
+| 40 | `problems/dotnet-palindrome-checker/` | easy | string | `PalindromeChecker.cs` | `cd problems/dotnet-palindrome-checker && dotnet test` |
+| 41 | `problems/dotnet-reverse-string/` | easy | string | `ReverseString.cs` | `cd problems/dotnet-reverse-string && dotnet test` |
 
 ### React
 
 | # | Problem | Difficulty | Category | Target File | Run Tests |
 |---|---------|-----------|----------|-------------|-----------|
-| 40 | `problems/react-counter-app/` | easy | frontend | `src/Counter.tsx` | `cd problems/react-counter-app && npm install && npm test` |
-| 41 | `problems/react-todo-list/` | easy | frontend | `src/TodoList.tsx` | `cd problems/react-todo-list && npm install && npm test` |
-| 42 | `problems/react-color-picker/` | medium | frontend | `src/ColorPicker.tsx` | `cd problems/react-color-picker && npm install && npm test` |
-| 43 | `problems/react-data-table/` | medium | frontend | `src/DataTable.tsx` | `cd problems/react-data-table && npm install && npm test` |
-| 44 | `problems/react-form-validator/` | medium | frontend | `src/FormValidator.tsx` | `cd problems/react-form-validator && npm install && npm test` |
-| 45 | `problems/react-drag-kanban/` | hard | frontend | `src/KanbanBoard.tsx` | `cd problems/react-drag-kanban && npm install && npm test` |
-| 46 | `problems/react-infinite-scroll/` | hard | frontend | `src/InfiniteScroll.tsx` | `cd problems/react-infinite-scroll && npm install && npm test` |
+| 42 | `problems/react-counter-app/` | easy | frontend | `src/Counter.tsx` | `cd problems/react-counter-app && npm install && npm test` |
+| 43 | `problems/react-todo-list/` | easy | frontend | `src/TodoList.tsx` | `cd problems/react-todo-list && npm install && npm test` |
+| 44 | `problems/react-color-picker/` | medium | frontend | `src/ColorPicker.tsx` | `cd problems/react-color-picker && npm install && npm test` |
+| 45 | `problems/react-data-table/` | medium | frontend | `src/DataTable.tsx` | `cd problems/react-data-table && npm install && npm test` |
+| 46 | `problems/react-form-validator/` | medium | frontend | `src/FormValidator.tsx` | `cd problems/react-form-validator && npm install && npm test` |
+| 47 | `problems/react-drag-kanban/` | hard | frontend | `src/KanbanBoard.tsx` | `cd problems/react-drag-kanban && npm install && npm test` |
+| 48 | `problems/react-infinite-scroll/` | hard | frontend | `src/InfiniteScroll.tsx` | `cd problems/react-infinite-scroll && npm install && npm test` |
 
 ### Bash
 
 | # | Problem | Difficulty | Category | Target File | Run Tests |
 |---|---------|-----------|----------|-------------|-----------|
-| 47 | `problems/bash-file-renamer/` | easy | system | `solution.sh` | `cd problems/bash-file-renamer && bash tests/test_solution.sh` |
-| 48 | `problems/bash-log-summary/` | easy | data | `solution.sh` | `cd problems/bash-log-summary && bash tests/test_solution.sh` |
-| 49 | `problems/bash-csv-merger/` | medium | data | `solution.sh` | `cd problems/bash-csv-merger && bash tests/test_solution.sh` |
-| 50 | `problems/bash-process-monitor/` | medium | system | `solution.sh` | `cd problems/bash-process-monitor && bash tests/test_solution.sh` |
-| 51 | `problems/bash-backup-rotation/` | hard | system | `solution.sh` | `cd problems/bash-backup-rotation && bash tests/test_solution.sh` |
+| 49 | `problems/bash-file-renamer/` | easy | system | `solution.sh` | `cd problems/bash-file-renamer && bash tests/test_solution.sh` |
+| 50 | `problems/bash-log-summary/` | easy | data | `solution.sh` | `cd problems/bash-log-summary && bash tests/test_solution.sh` |
+| 51 | `problems/bash-csv-merger/` | medium | data | `solution.sh` | `cd problems/bash-csv-merger && bash tests/test_solution.sh` |
+| 52 | `problems/bash-process-monitor/` | medium | system | `solution.sh` | `cd problems/bash-process-monitor && bash tests/test_solution.sh` |
+| 53 | `problems/bash-backup-rotation/` | hard | system | `solution.sh` | `cd problems/bash-backup-rotation && bash tests/test_solution.sh` |
 
 ### Rust
 
 | # | Problem | Difficulty | Category | Target File | Run Tests |
 |---|---------|-----------|----------|-------------|-----------|
-| 52 | `problems/wasm-calculator/` | hard | multi-lang | `src/lib.rs` | `cargo test --manifest-path problems/wasm-calculator/Cargo.toml` |
-| 53 | `problems/rust-fizz-buzz/` | easy | algorithm | `src/lib.rs` | `cargo test --manifest-path problems/rust-fizz-buzz/Cargo.toml` |
-| 54 | `problems/rust-string-manipulation/` | medium | string | `src/lib.rs` | `cargo test --manifest-path problems/rust-string-manipulation/Cargo.toml` |
-| 55 | `problems/rust-json-parser/` | medium | parsing | `src/lib.rs` | `cargo test --manifest-path problems/rust-json-parser/Cargo.toml` |
-| 56 | `problems/rust-lru-cache/` | medium | algorithm | `src/lib.rs` | `cargo test --manifest-path problems/rust-lru-cache/Cargo.toml` |
+| 54 | `problems/wasm-calculator/` | hard | multi-lang | `src/lib.rs` | `cargo test --manifest-path problems/wasm-calculator/Cargo.toml` |
+| 55 | `problems/rust-fizz-buzz/` | easy | algorithm | `src/lib.rs` | `cargo test --manifest-path problems/rust-fizz-buzz/Cargo.toml` |
+| 56 | `problems/rust-string-manipulation/` | medium | string | `src/lib.rs` | `cargo test --manifest-path problems/rust-string-manipulation/Cargo.toml` |
+| 57 | `problems/rust-json-parser/` | medium | parsing | `src/lib.rs` | `cargo test --manifest-path problems/rust-json-parser/Cargo.toml` |
+| 58 | `problems/rust-lru-cache/` | medium | algorithm | `src/lib.rs` | `cargo test --manifest-path problems/rust-lru-cache/Cargo.toml` |
 
 ## Common Pitfalls
 
