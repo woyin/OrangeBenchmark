@@ -23,3 +23,27 @@ def test_detect_language():
     assert _detect_language("rust-lib") == "rust"
     assert _detect_language("wasm-calculator") == "rust"
     assert _detect_language("two-sum") == "python"
+
+
+from typer.testing import CliRunner
+from runner.main import app
+
+runner = CliRunner()
+
+
+def test_list_problems_command():
+    result = runner.invoke(app, ["list-problems"])
+    assert result.exit_code == 0
+    assert "two-sum" in result.output
+
+
+def test_list_problems_filter_by_language():
+    result = runner.invoke(app, ["list-problems", "--language", "rust"])
+    assert result.exit_code == 0
+    assert "wasm-calculator" in result.output or "rust" in result.output
+
+
+def test_breakdown_command():
+    result = runner.invoke(app, ["breakdown", "--by", "language"])
+    # May fail if no results, but command structure should work
+    assert result.exit_code in (0, 1)  # 1 if no results

@@ -306,6 +306,115 @@ def ranking(
 
 
 @app.command()
+def trend(
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model name"),
+    problem: Optional[str] = typer.Option(None, "--problem", "-p", help="Filter by problem name"),
+):
+    """Show score trends across all historical runs."""
+    if not RESULTS_DIR.exists():
+        typer.echo("No results found. Run `orangebench score` first.")
+        raise typer.Exit(1)
+
+    result_files = sorted(RESULTS_DIR.glob("*.json"))
+    if not result_files:
+        typer.echo("No result files found in results/.")
+        raise typer.Exit(1)
+
+    runs = []
+    for rf in result_files:
+        with open(rf) as f:
+            data = json.load(f)
+        ts = data.get("timestamp", rf.stem)
+        for combo in data.get("combos", []):
+            if model and combo.get("model") != model:
+                continue
+            overall = combo.get("overall", 0)
+            probs = combo.get("problems", [])
+            if problem:
+                p_obj = next((x for x in probs if x["name"] == problem), None)
+                score = p_obj["total"] if p_obj else 0.0
+                runs.append((ts, combo.get("model", "?"), score))
+            else:
+                runs.append((ts, combo.get("model", "?"), overall))
+
+    if not runs:
+        typer.echo("No matching data found.")
+        raise typer.Exit(1)
+
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+    table = Table(title="Score Trend", show_header=True, header_style="bold cyan")
+    table.add_column("Timestamp", min_width=20)
+    table.add_column("Model", min_width=18)
+    table.add_column("Score", justify="right", min_width=8)
+
+    for ts, m, score in runs:
+        table.add_row(ts, m, f"{score:.3f}")
+
+    console.print()
+    console.print(table)
+    console.print()
+
+
+@app.command()
+def breakdown(
+    by: str = typer.Option("language", "--by", "-b", help="Breakdown by: language/category/difficulty"),
+):
+    """Show score breakdown by language, category, or difficulty."""
+    if not RESULTS_DIR.exists():
+        typer.echo("No results found. Run `orangebench score` first.")
+        raise typer.Exit(1)
+
+    result_files = sorted(RESULTS_DIR.glob("*.json"))
+    if not result_files:
+        typer.echo("No result files found in results/.")
+        raise typer.Exit(1)
+
+    with open(result_files[-1]) as f:
+        data = json.load(f)
+
+    problems_meta = {name: config for name, _, config in _discover_problems()}
+
+    breakdown_data = {}
+    for combo in data.get("combos", []):
+        for prob in combo.get("problems", []):
+            pname = prob["name"]
+            meta = problems_meta.get(pname, {})
+            if by == "language":
+                key = _detect_language(pname)
+            elif by == "category":
+                key = meta.get("category", "unknown")
+            elif by == "difficulty":
+                key = meta.get("difficulty", "unknown")
+            else:
+                typer.echo(f"Unknown breakdown dimension: {by}")
+                raise typer.Exit(1)
+            breakdown_data.setdefault(key, []).append(prob.get("total", 0))
+
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+    table = Table(title=f"Breakdown by {by.capitalize()}", show_header=True, header_style="bold cyan")
+    table.add_column(by.capitalize(), min_width=15)
+    table.add_column("Problems", justify="right", min_width=8)
+    table.add_column("Avg Score", justify="right", min_width=10)
+    table.add_column("Best", justify="right", min_width=8)
+    table.add_column("Worst", justify="right", min_width=8)
+
+    for key in sorted(breakdown_data.keys()):
+        scores = breakdown_data[key]
+        avg = sum(scores) / len(scores)
+        table.add_row(key, str(len(scores)), f"{avg:.3f}", f"{max(scores):.3f}", f"{min(scores):.3f}")
+
+    console.print()
+    console.print(table)
+    console.print()
+
+
+@app.command()
 def show(
     model: Optional[str] = typer.Option(None, "--model", "-m", help="Model/label name"),
     problem: Optional[str] = typer.Option(None, "--problem", "-p", help="Problem name"),
